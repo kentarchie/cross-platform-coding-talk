@@ -1,0 +1,161 @@
+import csv
+from random import randint
+import getopt, sys
+
+# voter registration data for the Warrenville Fire Protection District
+# columns are:
+FieldNames = ["District","PrecinctID","PrecinctCode","Precinct","VoterID","StateID","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","Address","City","zip","Phone","Email","DateofBirth","DateofRegistration","OriginalDateofRegistration","Party","Gender","AbsenteeType","Congressional","Senate","Representative","County_Forest_District","2016 Primary","2015 Consolidated General","2014 General","2014 Primary","2013 Consolidated General","2013 Consolidated Primary","2012 General","2012 General Primary","2011 Consolidated General","2010 General","2010 General Primary","2009 Consolidated General"]
+
+DATE_SEP = "-"
+LAST_NAME = "LastName"
+STREET_NAME = "StreetName"
+BIRTH_DATE = "DateofBirth"
+REG_DATE = "DateofRegistration"
+ORIG_REG_DATE = "OriginalDateofRegistration"
+ADDRESS = "Address"
+HOUSE_NUMBER = "HouseNumber"
+VOTER_ID = "VoterID"
+STATE_ID = "StateID"
+PHONE = "Phone"
+EMAIL = "Email"
+INPUT_FILE = "WFPDVotersOrig.csv"
+OUTPUT_FILE = "WFPDVotersOrigSafe.csv"
+
+STREET_PREFIX = "Street"
+NAME_PREFIX = "Doe"
+
+LastNameMap = {}
+StreetMap = {}
+
+def randomSign():
+   sign = 1 if (randint(0,1) == 0) else -1
+   return sign
+
+def alterYear(year):
+   delta = randint(1, 3) * randomSign()
+   newYear = year + delta
+   return str(newYear)
+
+def alterMonth(month):
+   delta = randint(1, 3) * randomSign()
+   newMonth = month + delta
+   newMonth = 12 if (newMonth > 12) else newMonth
+   newMonth = 1 if (newMonth < 1) else newMonth
+   if(newMonth < 10): return "0{0:d}".format(newMonth)
+   return str(newMonth)
+
+def alterDay(day):
+   delta = randint(1, 3) * randomSign()
+   newDay = day + delta
+   newDay = 28 if (newDay > 28) else newDay
+   newDay = 1 if (newDay < 1) else newDay
+   if(newDay < 10): return "0{0:d}".format(newDay)
+   return str(newDay)
+
+# date format is YYYY-MM-DD
+def alterDate(date):
+   if(date == ""):
+      return  "{1:s}{0:s}{2:s}{0:s}{3:s}".format(DATE_SEP,"1954","10", "22")
+   dateParts = date.split(DATE_SEP)
+   year = int(dateParts[0])
+   month = int(dateParts[1])
+   day = int(dateParts[2])
+   newYear = alterYear(year)
+   newMonth = alterMonth(month)
+   newDay = alterDay(day)
+   newDate = "{1:s}{0:s}{2:s}{0:s}{3:s}".format(DATE_SEP,newYear,newMonth, newDay)
+   #print("alterDate: newDate {0:s}".format(newDate))
+   return newDate
+# end of alterDate
+
+# map LastName to fake LastName
+# and StreetName to fake StreetName
+def makeMaps(csv_reader):
+   lineCount = 0
+   for voter in csv_reader:
+      if(not voter[LAST_NAME] in LastNameMap) :
+         LastNameMap[voter[LAST_NAME]] = "{1:s}{0:d}".format(lineCount,NAME_PREFIX)
+      if(not voter[STREET_NAME] in StreetMap) :
+         StreetMap[voter["StreetName"]] = "{1:s}{0:d}".format(lineCount,STREET_PREFIX)
+      lineCount += 1
+
+   for key in sorted(LastNameMap.iterkeys()):
+      print "%s: %s" % (key, LastNameMap[key])
+   print("makeMaps: {0:d} unique names.".format(len(LastNameMap)))
+
+   #for key in sorted(StreetMap.iterkeys()):
+      #print "%s: %s" % (key, StreetMap[key])
+   print("makeMaps: {0:d} unique streets.".format(len(StreetMap)))
+   return lineCount
+# end of makeMaps
+
+def usage():
+   print("anonymize.python -i input file name -o output file name")
+
+def main():
+   print("main: len(argv) {0:d}".format(len(sys.argv)))
+   if(len(sys.argv) < 2):
+      usage()
+      sys.exit(-1)
+   try :
+      opts, args = getopt.getopt(sys.argv[1:], "i:o:", ["help"])
+   except getopt.GetoptError as err:
+      # print help information and exit:
+      print(err) # will print something like "option -a not recognized"
+      usage()
+      sys.exit(2)
+   inFile = ""
+   outFile = ""
+   for o, a in opts:
+      if o in ("-h", "--help"):
+         usage()
+         sys.exit()
+      elif o in ("-o", "--output"):
+         outFile = a
+      elif o in ("-i", "--input"):
+         inFile = a
+      else:
+         assert False, "unhandled option"
+   if((inFile == "") or (outFile == "")):
+      usage()
+      sys.exit(-1)
+
+   # start of main code
+   csvFile = open(inFile)
+   csv_reader = csv.DictReader(csvFile, delimiter=',')
+
+   lineCount = 0
+   totalLines = makeMaps(csv_reader)
+   #print("main: Maps completed")
+
+   csvFile.seek(0)
+   csv_reader = csv.DictReader(csvFile, delimiter=',')
+
+   outputFile = open(outFile, mode='w')
+   csvWriter = csv.DictWriter(outputFile, fieldnames=FieldNames,quoting=csv.QUOTE_ALL)
+   csvWriter.writeheader()
+
+   for voter in csv_reader:
+      lName = voter[LAST_NAME]
+      #print("main: voter Last name {0:s}".format(lName))
+      voter[STREET_NAME] = StreetMap[voter[STREET_NAME]]
+      voter[LAST_NAME] = LastNameMap[lName]
+      #print("old date {0:s} new date {1:s}".format(voter[BIRTH_DATE], alterDate(voter[BIRTH_DATE])))
+      voter[BIRTH_DATE] = alterDate(voter[BIRTH_DATE])
+      voter[REG_DATE] = alterDate(voter[REG_DATE])
+      voter[ORIG_REG_DATE] = alterDate(voter[ORIG_REG_DATE])
+      voter[VOTER_ID] = 999
+      voter[STATE_ID] = 999
+      voter[PHONE] = "(123) 555-1234"
+      voter[EMAIL] = ""
+      voter[ADDRESS] = voter[HOUSE_NUMBER] + " " + voter[STREET_NAME]
+      lineCount += 1
+      if(lineCount % 100 == 0):
+         print("main: processed {0:d} records of {1:d}".format(lineCount,totalLines))
+      csvWriter.writerow(voter)
+
+   print("Voters processed")
+# end of main code
+
+if __name__ == "__main__":
+   main()

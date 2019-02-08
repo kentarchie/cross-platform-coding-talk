@@ -1,3 +1,9 @@
+# private stuff saved just in case
+attic
+
+#skip the test csv files
+data/*.csv
+
 # Logs
 logs
 *.log
