@@ -1,0 +1,27 @@
+{
+  "name": "voter-manager",
+  "version": "0.1.0",
+  "description": "Manipulate voter data, generate various lists, record data",
+  "main": "server-main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kentarchie/cross-platform-coding-talk.git"
+  },
+  "keywords": [
+    "electron-example",
+    "voters"
+  ],
+  "author": "Kent Archie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kentarchie/cross-platform-coding-talk/issues"
+  },
+  "homepage": "https://github.com/kentarchie/cross-platform-coding-talk#readme",
+  "devDependencies": {
+    "electron": "^4.0.4"
+  }
+}

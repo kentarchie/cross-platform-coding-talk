@@ -4,9 +4,11 @@ import getopt, sys
 
 # voter registration data for the Warrenville Fire Protection District
 # columns are:
-FieldNames = ["District","PrecinctID","PrecinctCode","Precinct","VoterID","StateID","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","Address","City","zip","Phone","Email","DateofBirth","DateofRegistration","OriginalDateofRegistration","Party","Gender","AbsenteeType","Congressional","Senate","Representative","County_Forest_District","2016 Primary","2015 Consolidated General","2014 General","2014 Primary","2013 Consolidated General","2013 Consolidated Primary","2012 General","2012 General Primary","2011 Consolidated General","2010 General","2010 General Primary","2009 Consolidated General"]
+FieldNames = ["District","Precinct","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","Address","City","zip","ParcelCode","Phone","Email","Age","DateofRegistration","OriginalDateofRegistration","Party","Gender","AbsenteeType","Congressional","Senate","Representative","County_Forest_District","2018 General","2018 Primary","2017 Consolidated General","2017 Consolidated Primary","2016 General","2016 Primary","2015 Consolidated General","2014 General","2014 Primary","2013 Consolidated General","2013 Consolidated Primary","2012 General","2012 General Primary","2011 Consolidated General","2010 General","2010 General Primary"]
 
 DATE_SEP = "-"
+DISTRICT = "District"
+PRECINCT = "Precinct"
 LAST_NAME = "LastName"
 STREET_NAME = "StreetName"
 BIRTH_DATE = "DateofBirth"
@@ -18,14 +20,21 @@ VOTER_ID = "VoterID"
 STATE_ID = "StateID"
 PHONE = "Phone"
 EMAIL = "Email"
-INPUT_FILE = "WFPDVotersOrig.csv"
-OUTPUT_FILE = "WFPDVotersOrigSafe.csv"
+#INPUT_FILE = "WFPDVotersOrig.csv"
+#OUTPUT_FILE = "WFPDVotersOrigSafe.csv"
 
 STREET_PREFIX = "Street"
 NAME_PREFIX = "Doe"
 
 LastNameMap = {}
 StreetMap = {}
+
+def alterPrecinct(precinct):
+	if(precinct.startswith("Whea")):
+		return "Precinct001"
+	if(precinct.startswith("Naper")):
+		return "Precinct002"
+	return "Precinct003"
 
 def randomSign():
    sign = 1 if (randint(0,1) == 0) else -1
@@ -68,19 +77,33 @@ def alterDate(date):
    return newDate
 # end of alterDate
 
+def formatCount(count):
+   formattedNumber = "{0:d}".format(count)
+   if(count < 10):
+      formattedNumber =  "0000{0:d}".format(count)
+   elif (count < 100):
+      formattedNumber =  "000{0:d}".format(count)
+   elif (count < 1000):
+      formattedNumber =  "00{0:d}".format(count)
+   elif (count < 10000):
+      formattedNumber =  "0{0:d}".format(count)
+   if(count < 1000):
+      print("formatCount: count :{0:d}: formattedNumber :{1:s}:".format(count,formattedNumber))
+   return formattedNumber
+
 # map LastName to fake LastName
 # and StreetName to fake StreetName
 def makeMaps(csv_reader):
    lineCount = 0
    for voter in csv_reader:
       if(not voter[LAST_NAME] in LastNameMap) :
-         LastNameMap[voter[LAST_NAME]] = "{1:s}{0:d}".format(lineCount,NAME_PREFIX)
+         LastNameMap[voter[LAST_NAME]] = "{0:s}{1:s}".format(NAME_PREFIX,formatCount(lineCount))
       if(not voter[STREET_NAME] in StreetMap) :
-         StreetMap[voter["StreetName"]] = "{1:s}{0:d}".format(lineCount,STREET_PREFIX)
+         StreetMap[voter["StreetName"]] = "{0:s}{1:s}".format(STREET_PREFIX,formatCount(lineCount))
       lineCount += 1
 
-   for key in sorted(LastNameMap.iterkeys()):
-      print "%s: %s" % (key, LastNameMap[key])
+   #for key in sorted(LastNameMap.iterkeys()):
+      #print "%s: %s" % (key, LastNameMap[key])
    print("makeMaps: {0:d} unique names.".format(len(LastNameMap)))
 
    #for key in sorted(StreetMap.iterkeys()):
@@ -138,19 +161,23 @@ def main():
    for voter in csv_reader:
       lName = voter[LAST_NAME]
       #print("main: voter Last name {0:s}".format(lName))
+      voter[DISTRICT] = "Taxing District"
+      voter[PRECINCT] = alterPrecinct(voter[PRECINCT])
       voter[STREET_NAME] = StreetMap[voter[STREET_NAME]]
       voter[LAST_NAME] = LastNameMap[lName]
-      #print("old date {0:s} new date {1:s}".format(voter[BIRTH_DATE], alterDate(voter[BIRTH_DATE])))
-      voter[BIRTH_DATE] = alterDate(voter[BIRTH_DATE])
+      if(BIRTH_DATE in voter): 
+         voter[BIRTH_DATE] = alterDate(voter[BIRTH_DATE])
       voter[REG_DATE] = alterDate(voter[REG_DATE])
       voter[ORIG_REG_DATE] = alterDate(voter[ORIG_REG_DATE])
-      voter[VOTER_ID] = 999
-      voter[STATE_ID] = 999
+      if(VOTER_ID in voter): 
+         voter[VOTER_ID] = 999
+      if(STATE_ID in voter): 
+         voter[STATE_ID] = 999
       voter[PHONE] = "(123) 555-1234"
       voter[EMAIL] = ""
       voter[ADDRESS] = voter[HOUSE_NUMBER] + " " + voter[STREET_NAME]
       lineCount += 1
-      if(lineCount % 100 == 0):
+      if(lineCount % 1000 == 0):
          print("main: processed {0:d} records of {1:d}".format(lineCount,totalLines))
       csvWriter.writerow(voter)
 

@@ -1,0 +1,9 @@
+Setup electron application
+
+https://electronjs.org/docs/tutorial/first-app
+
+
+third partyu libraries for web pages
+    jquery
+    bootstrap css library
+    moments date library
