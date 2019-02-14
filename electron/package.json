@@ -2,10 +2,10 @@
   "name": "voter-manager",
   "version": "0.1.0",
   "description": "Manipulate voter data, generate various lists, record data",
-  "main": "server-main.js",
+  "main": "serverMain.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "./node_modules/.bin/electron ."
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,8 @@
   "homepage": "https://github.com/kentarchie/cross-platform-coding-talk#readme",
   "devDependencies": {
     "electron": "^4.0.4"
+  },
+  "dependencies": {
+    "yargs": "^12.0.5"
   }
 }
