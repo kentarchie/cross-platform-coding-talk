@@ -1,5 +1,3 @@
-# cross-platform-coding-talk
-Examples of coding in Electron and Flutter
 Title:
 Write Once, Run Several Places:  Cross platform development on the desktop and mobile
 
@@ -10,7 +8,7 @@ Abstract:
 There are several existing technologies that can be used to produce applications
 that can be run on multiple desktop OSs (Windows, Mac OS and Linux} and also
 systems for building phone apps that will run on both Android and IOS.
-We will look at a few of these and then I will present examples developed using Electron
+I'll talk about a few of these and then I will present examples developed using Electron
 for the desktop and Flutter for the mobile world.
 
 Electron is a combination of chromium (for the display) and node.js (for the server).
@@ -30,4 +28,3 @@ Over the years he has programmed on everything from Fortran using punched cards 
 using node.js and Mongodb.
 He has taught at several local colleges including DePaul and North Central.
 He is lately having fun building phone apps and working on a backlog of unread books.
-
