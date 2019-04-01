@@ -1,7 +1,7 @@
 # private stuff saved just in case
 attic
 *.swp
-third-party
+ThirdParty
 
 #skip the test csv files
 data/*.csv

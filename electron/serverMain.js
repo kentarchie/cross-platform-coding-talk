@@ -10,28 +10,29 @@ const DEFAULT_DEBUG_HEIGHT = 700;
 const DEFAULT_DEBUG_WIDTH = 1000;
 const APP_URL = 'file://' + __dirname + '/clientApp/index.html';
 
-
-let appShell = null;
+let MainWindow = null;
+let CliData = {};
 
 function createMainWindow() {
  // for more options  handling, see https://github.com/yargs/yargs
-    let cliData = {};
     var argv = require('yargs')
         .usage('Usage: $0 [-debug]')
         .argv;
     if(!argv.debug) argv.debug=false;
-    cliData.debug=argv.debug;
-    console.log('createWindow: argv.debug ->', argv.debug);
-    let WindowHeight = (cliData.debug) ? DEFAULT_DEBUG_HEIGHT : DEFAULT_WINDOW_HEIGHT;
-    let WindowWidth  = (cliData.debug) ? DEFAULT_DEBUG_WIDTH : DEFAULT_WINDOW_WIDTH;
+    CliData.debug=argv.debug;
+    logger('createWindow: argv.debug ->%s', argv.debug);
+    let WindowHeight = (CliData.debug) ? DEFAULT_DEBUG_HEIGHT : DEFAULT_WINDOW_HEIGHT;
+    let WindowWidth  = (CliData.debug) ? DEFAULT_DEBUG_WIDTH : DEFAULT_WINDOW_WIDTH;
 
-    appShell = new BrowserWindow({ 
+    MainWindow = new BrowserWindow({ 
         width: WindowWidth
         ,height: WindowHeight 
     });
-    appShell.loadURL(APP_URL);
-    appShell.on('closed', () => { appShell = null; });
-    if(cliData.debug) appShell.webContents.openDevTools();
+	MainWindow.loadURL(APP_URL);
+	MainWindow.on('closed', () => { MainWindow = null; });
+	MainWindow.CliData = CliData;  // make CLI data available to  the renderer
+  if(CliData.debug) MainWindow.webContents.openDevTools(); // Open the DevTools.
+	
 }
 
 app.on('ready', createMainWindow);
@@ -43,6 +44,14 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    if (appShell == null)
+    if (MainWindow == null)
         createMainWindow();
 });
+
+function logger(format,...args)
+{
+  console.log('serverMain.logger start');
+  if(CliData.debug) {
+    console.log('MAIN: ' + format, ...args);
+  }
+} // logger

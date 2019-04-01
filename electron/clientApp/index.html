@@ -1,10 +1,24 @@
 <html>
     <head>
-    <title> Voter List Manager </title>
-
+    	<title> Voter List Manager </title>
+    	<link rel='stylesheet' type='text/css' href='css/voter-manager.css' />
     </head>
 <body>
     <h1>Voter List Manager</h1>
 
+   <footer>
+        <div class='center copyright'>Copyright Kent Archie <span>year</span></div>
+   </footer>
+    
+   <!-- https://stackoverflow.com/questions/32621988/electron-jquery-is-not-defined -->
+   <!-- Insert this line above script imports  -->
+   <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+   <script type='text/javascript' src='js/ThirdParty/jquery.js'></script>
+   <script type='text/javascript' src='js/voter-manager.js'></script>
+
+   <!-- Insert this line after script imports -->
+   <script>if (window.module) module = window.module;</script>
+   
 </body>
 </html>
