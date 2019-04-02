@@ -1,5 +1,7 @@
 'use strict';
-const { app, BrowserWindow } = require('electron');
+global.__base = __dirname + '/';
+const { app, BrowserWindow,Menu } = require('electron');
+const { ipcMain } = require('electron')
 const path = require('path');
 const url = require('url');
 const yargs = require('yargs');
@@ -11,6 +13,8 @@ const DEFAULT_DEBUG_WIDTH = 1000;
 const APP_URL = 'file://' + __dirname + '/clientApp/index.html';
 
 let MainWindow = null;
+let AboutWindow = null
+
 let CliData = {};
 
 function createMainWindow() {
@@ -33,7 +37,11 @@ function createMainWindow() {
 	MainWindow.CliData = CliData;  // make CLI data available to  the renderer
   if(CliData.debug) MainWindow.webContents.openDevTools(); // Open the DevTools.
 	
-}
+  let menu = createMainMenu();
+  logger('createWindow: got menu template');
+  Menu.setApplicationMenu(menu); 
+  logger('createWindow: menu set');
+} // createMainWindow
 
 app.on('ready', createMainWindow);
 
@@ -48,10 +56,101 @@ app.on('activate', () => {
         createMainWindow();
 });
 
+function createMainMenu()
+{
+  let menu = Menu.buildFromTemplate([
+    {
+      label: 'Menu'
+      ,submenu: [
+        {
+          label:'Create Voter DB'
+          ,click() { 
+				// read voter list CSV and create DB
+            MainWindow.webContents.send('create-voter-db', 'click!'); 
+          }
+        }
+        ,{
+          label:'Re-Create Voter DB'
+          ,click() { 
+				// delete current voter DB and create new one
+            MainWindow.webContents.send('recreate-voter-db', 'click!'); 
+          }
+        }
+        ,{
+          label:'Delete Voter DB'
+          ,click() { 
+				// delete current voter DB
+            MainWindow.webContents.send('delete-voter-db', 'click!'); 
+          }
+        }
+        ,{
+          label:'Settings'
+          ,click() { 
+          }
+        }
+        ,{
+          label:'Toggle Debug'
+          ,accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I'
+          ,click (item, focusedWindow) {
+            if (focusedWindow) focusedWindow.webContents.toggleDevTools();
+          }
+        }
+        ,{type:'separator'} 
+        ,{
+          label:'Exit'
+          ,role : 'quit'
+          ,accelerator: 'CmdOrCtrl+Shift+Q'
+          ,click() { 
+            app.quit() 
+          }
+        } // exit menu item
+      ]
+    } // Menu top menu item
+    ,{
+        label: 'About'
+        ,submenu: [
+          {
+            label:'About'
+            ,click() { 
+              openAboutWindow();
+            }
+          }
+        ]
+    } // About top menu item
+  ]);
+  return menu;
+} // createMainMenu
+
+function openAboutWindow()
+{
+	logger('openAboutWindow: START');
+	if(AboutWindow) {
+		AboutWindow.focus();
+		return;
+	}
+	AboutWindow = new BrowserWindow({
+		title : 'About Voter List Manager'
+		,width : 500
+		,height: 400
+		,resizable : false
+		,minimizable : false
+		,fullscreenable : false
+		,backgroundColor: "#d7ef77" 
+	});
+
+	let urlToLoad = 'file://' + __dirname + '/clientApp/about.html';
+	logger('openAboutWindow: loading url ->%s', urlToLoad);
+	AboutWindow.loadURL(urlToLoad);
+	AboutWindow.setMenuBarVisibility(false)
+  	//AboutWindow.webContents.openDevTools(); // Open the DevTools.
+
+	AboutWindow.on('closed', () => { AboutWindow = null; });
+} // openAboutWindow
+
 function logger(format,...args)
 {
-  console.log('serverMain.logger start');
-  if(CliData.debug) {
-    console.log('MAIN: ' + format, ...args);
-  }
+	console.log('serverMain.logger start');
+	if(CliData.debug) {
+		console.log('MAIN: ' + format, ...args);
+	}
 } // logger
