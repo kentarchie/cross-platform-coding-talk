@@ -39,18 +39,22 @@ function getCSVFile ()
 		return;
 	 }
 	 logger('ready: file selected =:%s:',fileNames[0]);
+    let pathParts = pathLib.parse(fileNames[0]);
+			  
+	 $('#csvFileName').html(pathParts.base);
 	 let jsonObj = [];
 	 csv()
 	 .fromFile(fileNames[0])
 	 .then((jsonObj)=>{
     	 console.log(jsonObj);
+		$('#numberOfRecords').html(jsonObj.length);
 	 })
   }); // showOpenDialog
 } // getCSVFile
 
 function logger(format,...args)
 {
-  console.log('voter-manager.logger start');
+  //console.log('voter-manager.logger start');
   if(CliData.debug) {
     console.log('RENDER: ' + format, ...args);
   }

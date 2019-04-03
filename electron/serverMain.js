@@ -3,6 +3,7 @@ global.__base = __dirname + '/';
 const { app, BrowserWindow,Menu } = require('electron');
 const { ipcMain } = require('electron')
 const path = require('path');
+
 const url = require('url');
 const yargs = require('yargs');
 
@@ -29,18 +30,27 @@ function createMainWindow() {
     let WindowWidth  = (CliData.debug) ? DEFAULT_DEBUG_WIDTH : DEFAULT_WINDOW_WIDTH;
 
     MainWindow = new BrowserWindow({ 
-        width: WindowWidth
-        ,height: WindowHeight 
+		width: WindowWidth
+		,height: WindowHeight 
+		,icon : path.join(__dirname , 'images/logo.png')
+		,backgroundColor: "#D6D8DC" // background color of the page, prevents any white flickering
+		,show: false // Don't show the window until it's ready, prevents any white flickering
     });
 	MainWindow.loadURL(APP_URL);
 	MainWindow.on('closed', () => { MainWindow = null; });
+		  
+  // Show window when page is ready
+	MainWindow.once('ready-to-show', () => { 
+		MainWindow.show();
+	});
+		  
 	MainWindow.CliData = CliData;  // make CLI data available to  the renderer
-  if(CliData.debug) MainWindow.webContents.openDevTools(); // Open the DevTools.
+	if(CliData.debug) MainWindow.webContents.openDevTools(); // Open the DevTools.
 	
-  let menu = createMainMenu();
-  logger('createWindow: got menu template');
-  Menu.setApplicationMenu(menu); 
-  logger('createWindow: menu set');
+	let menu = createMainMenu();
+	logger('createWindow: got menu template');
+	Menu.setApplicationMenu(menu); 
+	logger('createWindow: menu set');
 } // createMainWindow
 
 app.on('ready', createMainWindow);
@@ -149,7 +159,7 @@ function openAboutWindow()
 
 function logger(format,...args)
 {
-	console.log('serverMain.logger start');
+	//console.log('serverMain.logger start');
 	if(CliData.debug) {
 		console.log('MAIN: ' + format, ...args);
 	}

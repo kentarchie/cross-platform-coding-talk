@@ -8,8 +8,6 @@ html, body {
 }
 
 body {
-	display: flex;
-	flex-direction: column;
 }
 
 h1 {
@@ -22,22 +20,40 @@ h1 {
 	height: 100%;
 	background-color: lightgreen;
 	font-size: 36pt;
+	z-index:100;
 }
 
 #controls {
-	display:hide;
+	display:flex;
+	flex-direction: column;
 	height: 100%;
 	background-color: beige;
 	min-height: 100%;
-   height: auto !important; /* This line and the next line are not necessary unless you need IE6 support */
-   height: 100%;
+	width:100%;
    margin: 0 auto -1em; /* the bottom margin is the negative value of the footer's height */
 }
 
-label { font-size: normal; font-variant: small-caps; }
+.label { font-weight: bold; font-variant: small-caps; }
+
+.status {
+	display:flex;
+	flex-direction: row;
+	margin-right: 10px;
+}
+
+.statusValue {
+	font-family: monospace;
+}
+.statusValue::before {
+  content: ":";
+}
+
+.mainBody {
+	flex-direction: row;
+}
 
 footer {
-    border:1px solid green;
+    border-top:1px solid green;
     width:100%;
     height:1em;
 	 position:fixed;
