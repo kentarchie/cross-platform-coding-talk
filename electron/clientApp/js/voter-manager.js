@@ -21,6 +21,8 @@ $(document).ready(function()
    logger('init:  copyRightYear=:%s:',copyRightYear);
    $('.copyright span').html(copyRightYear);
 
+	$('#loadingBlock').hide();
+	$('#controls').css('display','show');
 	logger('ready: FINISHED ');
 }); // ready function
 
