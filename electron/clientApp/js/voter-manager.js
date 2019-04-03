@@ -11,10 +11,21 @@ $(document).ready(function()
 {
 	logger('ready: START ');
 
+   ipcRenderer.on('create-voter-db', (event, arg) => {
+        logger('ready: great-voter-db received');
+        getCSVFile();
+        logger('ready: voter db setup');
+    });
+		  
    var copyRightYear = new Date().getFullYear();
    logger('init:  copyRightYear=:%s:',copyRightYear);
    $('.copyright span').html(copyRightYear);
 
+	logger('ready: FINISHED ');
+}); // ready function
+
+function getCSVFile () 
+{
 	dialog.showOpenDialog((fileNames) => {
     // fileNames is an array that contains all the selected
     if(fileNames === undefined){
@@ -33,7 +44,7 @@ $(document).ready(function()
     	 console.log(jsonObj);
 	 })
   }); // showOpenDialog
-}); // ready function
+} // getCSVFile
 
 function logger(format,...args)
 {
