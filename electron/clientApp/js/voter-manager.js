@@ -46,8 +46,9 @@ function getCSVFile ()
 	 csv()
 	 .fromFile(fileNames[0])
 	 .then((jsonObj)=>{
-    	 console.log(jsonObj);
-		$('#numberOfRecords').html(jsonObj.length);
+			$('#numberOfRecords').html(jsonObj.length);
+			$('#numberOfFields').html(Object.keys(jsonObj[0]).length);
+			//console.log('jsonObj[0]: ' + JSON.stringify(jsonObj[0],null,'\t'));
 	 })
   }); // showOpenDialog
 } // getCSVFile

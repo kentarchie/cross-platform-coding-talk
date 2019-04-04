@@ -33,20 +33,26 @@ h1 {
    margin: 0 auto -1em; /* the bottom margin is the negative value of the footer's height */
 }
 
-.label { font-weight: bold; font-variant: small-caps; }
+div.statusElement:nth-child(n+2) {
+	border-left:solid 1px black;
+	margin-left: 10px;
+}
 
 .status {
 	display:flex;
 	flex-direction: row;
-	margin-right: 10px;
 }
 
 .statusValue {
 	font-family: monospace;
+	width: 4em;
 }
-.statusValue::before {
+
+.statusElement.label::after {
   content: ":";
 }
+
+.label { font-weight: bold; font-variant: small-caps; }
 
 .mainBody {
 	flex-direction: row;
