@@ -3,6 +3,7 @@ const { ipcRenderer } = require('electron')
 const fsLib = require('fs');
 const pathLib = require('path');
 const {dialog} = require('electron').remote;
+var dateFormat = require('dateformat');
 const csv=require('csvtojson')
 
 let CliData = remote.getCurrentWindow().CliData; // parameters from the command line
@@ -34,22 +35,26 @@ function getCSVFile ()
         console.log("No file selected");
         return;
     }
-	 if(fileNames.length == 0) {
-		logger('No file selected');
-		return;
-	 }
-	 logger('ready: file selected =:%s:',fileNames[0]);
+	  if(fileNames.length == 0) {
+	    logger('No file selected');
+	    return;
+	  }
+	  logger('ready: file selected =:%s:',fileNames[0]);
     let pathParts = pathLib.parse(fileNames[0]);
+    let fileStats = fsLib.statSync(fileNames[0]);
+
+    let formatted = dateFormat( new Date(fileStats.mtime), "dS mmmm, yyyy");
+		$('#csvFileDate').html(formatted);
 			  
-	 $('#csvFileName').html(pathParts.base);
-	 let jsonObj = [];
-	 csv()
-	 .fromFile(fileNames[0])
-	 .then((jsonObj)=>{
-			$('#numberOfRecords').html(jsonObj.length);
-			$('#numberOfFields').html(Object.keys(jsonObj[0]).length);
-			//console.log('jsonObj[0]: ' + JSON.stringify(jsonObj[0],null,'\t'));
-	 })
+	  $('#csvFileName').html(pathParts.base);
+	  let jsonObj = [];
+	  csv()
+	    .fromFile(fileNames[0])
+	    .then((jsonObj)=>{
+		      $('#numberOfRecords').html(jsonObj.length);
+			    $('#numberOfFields').html(Object.keys(jsonObj[0]).length);
+			    //console.log('jsonObj[0]: ' + JSON.stringify(jsonObj[0],null,'\t'));
+	    })
   }); // showOpenDialog
 } // getCSVFile
 

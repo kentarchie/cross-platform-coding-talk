@@ -10,7 +10,7 @@ const yargs = require('yargs');
 const DEFAULT_WINDOW_HEIGHT = 600;
 const DEFAULT_WINDOW_WIDTH = 800;
 const DEFAULT_DEBUG_HEIGHT = 700;
-const DEFAULT_DEBUG_WIDTH = 1000;
+const DEFAULT_DEBUG_WIDTH = 1400;
 const APP_URL = 'file://' + __dirname + '/clientApp/index.html';
 
 let MainWindow = null;
