@@ -12,8 +12,8 @@ const yargs = require('yargs');
 // https://medium.com/cameron-nokes/how-to-store-user-data-in-electron-3ba6bf66bc1e
 const DEFAULT_WINDOW_HEIGHT = 600;
 const DEFAULT_WINDOW_WIDTH = 800;
-const DEFAULT_DEBUG_HEIGHT = 700;
-const DEFAULT_DEBUG_WIDTH = 1600;
+const DEFAULT_DEBUG_HEIGHT_CHANGE = 100;
+const DEFAULT_DEBUG_WIDTH_CHANGE = 600;
 const APP_URL = 'file://' + __dirname + '/clientApp/index.html';
 
 let MainWindow = null;
@@ -26,9 +26,6 @@ const Config = new ManageConfig({
   // We'll call our data file 'user-preferences'
   logger : logger
   ,configName: 'user-preferences'
-  ,defaults: {
-    'windowBounds': { 'windowWidth': DEFAULT_WINDOW_WIDTH, 'windowHeight': DEFAULT_WINDOW_HEIGHT }
-  }
 });
 
 function createMainWindow() {
@@ -43,8 +40,8 @@ function createMainWindow() {
     logger('createWindow config values: width :%d: height :%d:',windowWidth,windowHeight);
 
     if(CliData.debug)  {
-      windowHeight += 100; //DEFAULT_DEBUG_HEIGHT;
-      windowWidth  += 500; //DEFAULT_DEBUG_WIDTH;
+      windowHeight += DEFAULT_DEBUG_HEIGHT_CHANGE;
+      windowWidth  += DEFAULT_DEBUG_WIDTH_CHANGE;
     }
     //let WindowHeight = (CliData.debug) ? DEFAULT_DEBUG_HEIGHT : DEFAULT_WINDOW_HEIGHT;
     //let WindowWidth  = (CliData.debug) ? DEFAULT_DEBUG_WIDTH : DEFAULT_WINDOW_WIDTH;
@@ -68,14 +65,11 @@ function createMainWindow() {
       logger('createWindow after resize: width :%d: height :%d:',windowWidth,windowHeight);
     }); // window resize
 
-
 	  MainWindow.loadURL(APP_URL);
 	  MainWindow.on('closed', () => { MainWindow = null; });
 		  
     // Show window when page is ready
-	  MainWindow.once('ready-to-show', () => { 
-		  MainWindow.show();
-	  });
+	  MainWindow.once('ready-to-show', () => { MainWindow.show(); });
 		  
 	  MainWindow.CliData = CliData;  // make CLI data available to  the renderer
 	  if(CliData.debug) MainWindow.webContents.openDevTools(); // Open the DevTools.

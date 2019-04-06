@@ -4,11 +4,21 @@ const electron = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-let opts = null;
-let logger = console.log;
+const DEFAULTS = {
+  'csvFileName' : ''
+    ,'csvFileDate' : ''
+    ,'votersDBName' : ''
+    ,'queryDBName' : ''
+    ,'numberDBRecords' : 0
+    ,'numberDBFields' : 0
+    ,'windowBounds': { 'windowWidth': DEFAULT_WINDOW_WIDTH, 'windowHeight': DEFAULT_WINDOW_HEIGHT }
+};
+
+//let logger = console.log;
 class Config {
   constructor(opts) {
-    this.opts = opts;
+    const finalOpts = Object.assign({}, DEFAULTS, opts);
+    this.opts = finalOpts;
     if(opts.logger) logger = opts.logger;
     console.log('console.log: Config.logger = :%s:',opts.logger);
     // Renderer process has to get `app` module via `remote`, whereas the main process can get it directly
@@ -19,7 +29,7 @@ class Config {
     // We'll use the `configName` property to set the file name and path.join to bring it all together as a string
     this.path = path.join(userDataPath, opts.configName + '.json');
     
-    this.data = parseDataFile(this.path, opts.defaults);
+    this.data = parseDataFile(this.path);
     console.log('console.log: Config.data = :%s:',JSON.stringify(this.data,null,'\t'));
   } // constructor
   
@@ -40,7 +50,7 @@ class Config {
   } // set
 }
 
-function parseDataFile(filePath, defaults) 
+function parseDataFile(filePath) 
 {
   // We'll try/catch it in case the file doesn't exist yet, which will be the case on the first application run.
   // `fs.readFileSync` will return a JSON string which we then parse into a Javascript object
@@ -48,7 +58,7 @@ function parseDataFile(filePath, defaults)
     return JSON.parse(fs.readFileSync(filePath));
   } catch(error) {
     // if there was some kind of error, return the passed in defaults instead.
-    return defaults;
+    return DEFAULTS;
   }
 } // parseDataFile
 
