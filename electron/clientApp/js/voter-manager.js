@@ -12,24 +12,26 @@ $(document).ready(function()
 {
 	logger('ready: START ');
 
-   ipcRenderer.on('create-voter-db', (event, arg) => {
-        logger('ready: great-voter-db received');
-        getCSVFile();
-        logger('ready: voter db setup');
-    });
+  ipcRenderer.on('create-voter-db', (event, arg) => {
+    logger('ready: great-voter-db received');
+    getCSVFile();
+    logger('ready: voter db setup');
+  });
 		  
-   var copyRightYear = new Date().getFullYear();
-   logger('init:  copyRightYear=:%s:',copyRightYear);
-   $('.copyright span').html(copyRightYear);
+  var copyRightYear = new Date().getFullYear();
+  logger('init:  copyRightYear=:%s:',copyRightYear);
+  $('.copyright span').html(copyRightYear);
 
 	$('#loadingBlock').hide();
 	$('#controls').css('display','show');
 	logger('ready: FINISHED ');
 }); // ready function
 
+// let the user select a CSV file and parse it into JSON
+// also update the status display
 function getCSVFile () 
 {
-	dialog.showOpenDialog((fileNames) => {
+    dialog.showOpenDialog((fileNames) => {
     // fileNames is an array that contains all the selected
     if(fileNames === undefined){
         console.log("No file selected");
@@ -43,10 +45,13 @@ function getCSVFile ()
     let pathParts = pathLib.parse(fileNames[0]);
     let fileStats = fsLib.statSync(fileNames[0]);
 
+    // display last modification date like 1st April, 2019
     let formatted = dateFormat( new Date(fileStats.mtime), "dS mmmm, yyyy");
 		$('#csvFileDate').html(formatted);
 			  
-	  $('#csvFileName').html(pathParts.base);
+    $('#csvFileName').html(pathParts.base);
+
+    // display number of records and number of fields per record
 	  let jsonObj = [];
 	  csv()
 	    .fromFile(fileNames[0])
