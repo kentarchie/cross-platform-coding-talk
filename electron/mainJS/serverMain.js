@@ -1,50 +1,59 @@
 'use strict';
 global.__base = __dirname + '/';
-const { app, BrowserWindow,Menu } = require('electron');
-const { ipcMain } = require('electron')
+const Constants=require('./constants.js');
+const {app, BrowserWindow,Menu} = require('electron');
+const {ipcMain} = require('electron')
 const path = require('path');
-const settings = require('electron-settings');
-const ManageConfig = require('./config.js');
+const Settings = require('electron-settings');
+//const ManageConfig = require('./config.js');
 
 const url = require('url');
 const yargs = require('yargs');
-// config ahndling code mostly from
+// config handling code mostly from
 // https://medium.com/cameron-nokes/how-to-store-user-data-in-electron-3ba6bf66bc1e
-const DEFAULT_WINDOW_HEIGHT = 600;
-const DEFAULT_WINDOW_WIDTH = 800;
-const DEFAULT_DEBUG_HEIGHT_CHANGE = 100;
-const DEFAULT_DEBUG_WIDTH_CHANGE = 600;
-const APP_URL = 'file://' + __dirname + '/clientApp/index.html';
+const APP_URL = 'file://' + __dirname + '/../clientApp/index.html';
 
 let MainWindow = null;
 let AboutWindow = null
 
 let CliData = {};
 
-// First instantiate the class
-const Config = new ManageConfig({
-  // We'll call our data file 'user-preferences'
+Settings.set('logger',logger);
+/*
+let Config = new ManageConfig({
   logger : logger
   ,configName: 'user-preferences'
 });
+*/
 
-function createMainWindow() {
+function createMainWindow()
+{
  // for more options  handling, see https://github.com/yargs/yargs
     var argv = require('yargs')
         .usage('Usage: $0 [-debug]')
         .argv;
+    //console.log('createWindow: isMain() -> %s', Config.isMain());
     if(!argv.debug) argv.debug=false;
+    if(!argv.mdebug) argv.mdebug=false;
+    if(!argv.rdebug) argv.rdebug=false;
     CliData.debug=argv.debug;
+    CliData.rdebug=argv.rdebug;
+    CliData.mdebug=argv.mdebug;
+
+	 //logger('createWindow: this is :%s:', (Config.isMain()) ? 'Main' : 'Renderer');
     logger('createWindow: argv.debug ->%s', argv.debug);
-    let { windowWidth, windowHeight } = Config.get('windowBounds');
+    //logger('createMainWindow: Config = :%s:',JSON.stringify(Config,null,'\t'));
+    //let { windowWidth, windowHeight } = Config.get('windowBounds');
+    //let windowSize = Config.get('windowBounds');
+    //logger('createWindow config values: width :%d: height :%d:',windowSize.windowWidth,windowSize.windowHeight);
+    let windowWidth = (Settings.has('windowWidth')) ? Settings.get('windowWidth') : Constants.DEFAULT_WINDOW_WIDTH;
+    let windowHeight = (Settings.has('windowHeight')) ? Settings.get('windowHeight') : Constants.DEFAULT_WINDOW_HEIGHT;
     logger('createWindow config values: width :%d: height :%d:',windowWidth,windowHeight);
 
     if(CliData.debug)  {
-      windowHeight += DEFAULT_DEBUG_HEIGHT_CHANGE;
-      windowWidth  += DEFAULT_DEBUG_WIDTH_CHANGE;
+      windowHeight += Constants.DEFAULT_DEBUG_HEIGHT_CHANGE;
+      windowWidth  += Constants.DEFAULT_DEBUG_WIDTH_CHANGE;
     }
-    //let WindowHeight = (CliData.debug) ? DEFAULT_DEBUG_HEIGHT : DEFAULT_WINDOW_HEIGHT;
-    //let WindowWidth  = (CliData.debug) ? DEFAULT_DEBUG_WIDTH : DEFAULT_WINDOW_WIDTH;
 
     MainWindow = new BrowserWindow({ 
 		  'width': windowWidth
@@ -59,25 +68,29 @@ function createMainWindow() {
     MainWindow.on('resize', () => {
       // The event doesn't pass us the window size, so we call the `getBounds` method which returns an object with
       // the height, width, and x and y coordinates.
-      let { windowWidth, windowHeight } = MainWindow.getBounds();
+      let { width, height } = MainWindow.getBounds();
+      let windowSize = MainWindow.getBounds();
+    	logger('createMainWindow: windowSize = :%s:',JSON.stringify(windowSize,null,'\t'));
       // Now that we have them, save them using the `set` method.
-      Config.set('windowBounds', { windowWidth, windowHeight });
-      logger('createWindow after resize: width :%d: height :%d:',windowWidth,windowHeight);
+      //Config.set('windowBounds', { 'windowWidth' : width, 'windowHeight' : height });
+      Settings.set('windowWidth',width);
+      Settings.set('windowHeight',height);
+      logger('createWindow after resize: width :%d: height :%d:',width,height);
     }); // window resize
 
-	  MainWindow.loadURL(APP_URL);
-	  MainWindow.on('closed', () => { MainWindow = null; });
+	 MainWindow.loadURL(APP_URL);
+	 MainWindow.on('closed', () => { MainWindow = null; });
 		  
     // Show window when page is ready
-	  MainWindow.once('ready-to-show', () => { MainWindow.show(); });
+	 MainWindow.once('ready-to-show', () => { MainWindow.show(); });
 		  
-	  MainWindow.CliData = CliData;  // make CLI data available to  the renderer
-	  if(CliData.debug) MainWindow.webContents.openDevTools(); // Open the DevTools.
+	 MainWindow.CliData = CliData;  // make CLI data available to  the renderer
+	 if(CliData.debug || CliData.rdebug) MainWindow.webContents.openDevTools(); // Open the DevTools.
 	
-	  let menu = createMainMenu();
-	  logger('createWindow: got menu template');
-	  Menu.setApplicationMenu(menu); 
-	  logger('createWindow: menu set');
+	 let menu = createMainMenu();
+	 logger('createWindow: got menu template');
+	 Menu.setApplicationMenu(menu); 
+	 logger('createWindow: menu set');
 } // createMainWindow
 
 app.on('ready', () => {
@@ -177,7 +190,7 @@ function openAboutWindow()
 		,backgroundColor: "#d7ef77" 
 	});
 
-	let urlToLoad = 'file://' + __dirname + '/clientApp/about.html';
+	let urlToLoad = 'file://' + __dirname + '/../clientApp/about.html';
 	logger('openAboutWindow: loading url ->%s', urlToLoad);
 	AboutWindow.loadURL(urlToLoad);
 	AboutWindow.setMenuBarVisibility(false)
@@ -189,7 +202,7 @@ function openAboutWindow()
 function logger(format,...args)
 {
 	//console.log('serverMain.logger start');
-	if(CliData.debug) {
+	if(CliData.debug || CliData.mdebug) {
 		console.log('MAIN: ' + format, ...args);
 	}
 } // logger

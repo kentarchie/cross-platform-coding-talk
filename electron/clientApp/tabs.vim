@@ -1,4 +1,6 @@
 tabe ./js/voter-manager.js
 tabe ./css/voter-manager.css
-tabe ../serverMain.js
+tabe ../mainJS/config.js
+tabe ../mainJS/serverMain.js
+tabe ../mainJS/constants.js
 tabe about.html
