@@ -3,7 +3,7 @@ const Utilities=require('../mainJS/Utilities.js');
 const {remote} = require('electron');
 const {ipcRenderer} = require('electron');
 const fsLib = require('fs');
-const pathLib = require('path');
+const path = require('path');
 const {dialog} = require('electron').remote;
 const dateFormat = require('dateformat');
 const csv=require('csvtojson');
@@ -33,6 +33,7 @@ $(document).ready(function()
 
 	setStatus();
 	Utils.logger('ready: FINISHED ');
+	Settings.set('UVM.dbSavePath','');
 }); // ready function
 
 function setStatus()
@@ -41,8 +42,8 @@ function setStatus()
 
 	fields.forEach((field) => {
 		Utils.logger('setStatus: field=:%s:',field);
-		if(Settings.has(field)) {
-			let value = Settings.get(field);
+		if(Settings.has('UVM.' + field)) {
+			let value = Settings.get('UVM.' + field);
 			Utils.logger('setStatus: has field=:%s: value = :%s:',field,value);
 			$('#'+field).html(value);
 		}
@@ -67,29 +68,39 @@ function getCSVFile ()
 	    Utils.logger('No file selected');
 	    return;
 	 }
-	 Utils.logger('ready: file selected =:%s:',fileNames[0]);
-	 Settings.set('csvFileName',fileNames[0]);
+    let chosenFile = fileNames[0];
+	 Utils.logger('ready: file selected =:%s:',chosenFile);
+	 Settings.set('UVM.csvFileName',chosenFile);
 
-    let pathParts = pathLib.parse(fileNames[0]);
-    let fileStats = fsLib.statSync(fileNames[0]);
+    let pathParts = path.parse(chosenFile);
+    let fileStats = fsLib.statSync(chosenFile);
 
     // display last modification date like 1st April, 2019
     let formatted = dateFormat( new Date(fileStats.mtime), "dS mmmm, yyyy");
 	 $('#csvFileDate').html(formatted);
-	 Settings.set('csvFileDate',formatted);
+	 Settings.set('UVM.csvFileDate',formatted);
 			  
     $('#csvFileName').html(pathParts.base);
 
     // display number of records and number of fields per record
 	  let jsonObj = [];
 	  csv()
-	    .fromFile(fileNames[0])
+	    .fromFile(chosenFile)
 	    .then((jsonObj)=>{
 		      $('#numberOfRecords').html(jsonObj.length);
 			    $('#numberOfFields').html(Object.keys(jsonObj[0]).length);
-				 Settings.set('numberOfRecords',jsonObj.length);
-				 Settings.set('numberOfFields',Object.keys(jsonObj[0]).length);
+				 Settings.set('UVM.numberOfRecords',jsonObj.length);
+				 Settings.set('UVM.numberOfFields',Object.keys(jsonObj[0]).length);
 			    //Utils.logger('jsonObj[0]: ' + JSON.stringify(jsonObj[0],null,'\t'));
-	    })
+	    });
+       makeDB(jsonObj);
   }); // showOpenDialog
 } // getCSVFile
+
+function makeDB(jsonObj)
+{
+	Utils.logger('makeDB: START ');
+   let dbDir = Settings.get('UVM.dbDir');
+   let queriesDir = Settings.get('UVM.queriesDir');
+	Utils.logger('makeDB: dbDir = :%s: queriesDir = :%s:',dbDir,queriesDir);
+} // makeDB

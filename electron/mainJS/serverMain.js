@@ -35,8 +35,8 @@ function createMainWindow()
     //Utils.logger('createWindow: Utils.logger isMain() -> %s', Utils.isMain());
 
     Utils.logger('createWindow: argv.debug ->%s', argv.debug);
-    let windowWidth =  (Settings.has('windowWidth'))  ? Settings.get('windowWidth')  : Constants.DEFAULT_WINDOW_WIDTH;
-    let windowHeight = (Settings.has('windowHeight')) ? Settings.get('windowHeight') : Constants.DEFAULT_WINDOW_HEIGHT;
+    let windowWidth =  (Settings.has('UVM.windowWidth'))  ? Settings.get('UVM.windowWidth')  : Constants.DEFAULT_WINDOW_WIDTH;
+    let windowHeight = (Settings.has('UVM.windowHeight')) ? Settings.get('UVM.windowHeight') : Constants.DEFAULT_WINDOW_HEIGHT;
     Utils.logger('createWindow config values: width :%d: height :%d:',windowWidth,windowHeight);
 
     if(CliData.debug)  {
@@ -47,7 +47,7 @@ function createMainWindow()
     MainWindow = new BrowserWindow({ 
 		  'width': windowWidth
 		  ,'height': windowHeight 
-		  ,icon : path.join(__dirname , 'images/logo.png')
+		  ,icon : path.join(__dirname , '../images/logo.png')
 		  ,backgroundColor: "#D6D8DC" // background color of the page, prevents any white flickering
 		  ,show: false // Don't show the window until it's ready, prevents any white flickering
     });
@@ -61,8 +61,8 @@ function createMainWindow()
       let windowSize = MainWindow.getBounds();
     	Utils.logger('createMainWindow: windowSize = :%s:',JSON.stringify(windowSize,null,'\t'));
       // Now that we have them, save them using the `set` method.
-      Settings.set('windowWidth',width);
-      Settings.set('windowHeight',height);
+      Settings.set('UVM.windowWidth',width);
+      Settings.set('UVM.windowHeight',height);
       Utils.logger('createWindow after resize: width :%d: height :%d:',width,height);
     }); // window resize
 
@@ -82,6 +82,13 @@ function createMainWindow()
 } // createMainWindow
 
 app.on('ready', () => {
+  let userDataPath = app.getPath ('userData');
+  Utils.logger('ready: userData = :%s:',userDataPath);
+  if(!Settings.has('UVM.dbDir'))      Settings.set('UVM.dbDir',userDataPath+'/DB');
+  else Utils.logger('ready: userDataPath already set is :%s:',userDataPath);
+  Utils.logger('ready: dbDir in main is :%s:',Settings.get('UVM.dbDir'));
+
+  if(!Settings.has('UVM.queriesDir')) Settings.set('UVM.queriesDir',userDataPath+'/Queries');
   createMainWindow();
 });
 
