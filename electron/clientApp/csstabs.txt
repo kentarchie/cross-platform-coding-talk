@@ -1,0 +1,134 @@
+https://codepen.io/Chesswithsean/pen/jzYXjo
+<div class="container">
+  <input type="radio" id="tab1" name="tab" checked>
+  <label for="tab1"><i class="fa fa-code"></i> Features</label>
+  <input type="radio" id="tab2" name="tab">
+  <label for="tab2"><i class="fa fa-history"></i> History</label>
+  <input type="radio" id="tab3" name="tab">
+  <label for="tab3"><i class="fa fa-pencil"></i> Reviews</label>
+  <input type="radio" id="tab4" name="tab">
+  <label for="tab4"><i class="fa fa-share-alt"></i> Share</label>
+  <div class="line"></div>
+  <div class="content-container">
+    <div class="content" id="c1">
+      <h3>Features</h3>
+      <p>There really are a lot of features.</p>
+    </div>
+    <div class="content" id="c2">
+      <h3>History</h3>
+      <p>The project started in 2018 when someone needed something.</p>
+    </div>
+    <div class="content" id="c3">
+      <h3>Reviews</h3>
+      <p>Amazing product. I don't know how it works.</p>
+      <i>- Anonymous</i>
+    </div>
+    <div class="content" id="c4">
+      <h3>Share</h3>
+      <p>This product is currently not shareable.</p>
+    </div>
+  </div>
+</div>o
+
+* {
+  box-sizing: border-box;
+}
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  font-family: sans-serif;
+  background: linear-gradient(45deg,#3949AB,#1E88E5);
+  .container {
+    width: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 0;
+    box-shadow: 0 0 100px RGBa(0,0,0,0.5);
+    border-radius: 3px;
+    overflow: hidden;
+    input {
+      display: none;
+      &:checked + label {
+        background: #eee;
+      }
+      @for $i from 1 through 4 {
+        &#tab#{$i}:checked {
+          ~ .line {
+            left: #{($i - 1) * 25%};
+          }
+          ~ .content-container #c#{$i} {
+            opacity: 1;
+          }
+        }
+      }
+    }
+    label {
+      display: inline-block;
+      font-size: 16px;
+      height: 36px;
+      line-height: 36px;
+      width: 25%;
+      text-align: center;
+      background: #f4f4f4;
+      color: #555;
+      position: relative;
+      transition: 0.25s background ease;
+      cursor: pointer;
+      &::after {
+        content: "";
+        height: 2px;
+        width: 100%;
+        position: absolute;
+        display: block;
+        background: #ccc;
+        bottom: 0;
+        opacity: 0;
+        left: 0;
+        transition: 0.25s ease;
+      }
+      &:hover::after {
+        opacity: 1;
+      }
+    }
+    .line {
+      position: absolute;
+      height: 2px;
+      background: #1E88E5;
+      width: 25%;
+      top: 34px;
+      left: 0;
+      transition: 0.25s ease;
+    }
+    .content-container {
+      background: #eee;
+      position: relative;
+      height: 100px;
+      font-size: 16px;
+      .content {
+        position: absolute;
+        padding: 10px;
+        width: 100%;
+        top: 0;
+        opacity: 0;
+        transition: 0.25s ease;
+        color: #333;
+        h3 {
+          font-weight: 200;
+          margin: 10px 0;
+        }
+        p {
+          margin: 10px 0;
+        }
+        p, i {
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}
