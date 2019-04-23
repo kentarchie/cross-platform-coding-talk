@@ -1,6 +1,7 @@
 <html>
     <head>
     	<title> Voter List Manager </title>
+    	<link rel='stylesheet' type='text/css' href='css/tabs.css' />
     	<link rel='stylesheet' type='text/css' href='css/voter-manager.css' />
     </head>
 <body>
@@ -12,35 +13,58 @@
     </div> <!-- loadingBlock -->
 
     <div id='controls'>
-	    <div class='status'>
-			<div class='statusElement'>
-				<span class='label' title='Name of the voter list source file'>CSV File Name</span>
-				<span class='statusValue' id='csvFileName' title='Name of the voter list source file'>&nbsp;</span>
-			</div>
-			<div class='statusElement'>
-				<span class='label' title='last modified date ofthe source file'>CSV File Date</span>
-		    <span class='statusValue' id='csvFileDate' title='Last modified date of the source file'>&nbsp;</span>
-			</div>
-			<div class='statusElement'>
-				<span class='label' title='Number of voter records'>Number Of Records</span>
-				<span class='statusValue' id='numberOfRecords' title='Number of voter records'>&nbsp;</span>
-			</div>
-			<div class='statusElement'>
-				<span class='label' title='Number of fields per record'>Number Of Fields</span>
-		    <span class='statusValue' id='numberOfFields' title='Number of fields per record'>&nbsp;</span>
-			</div>
-			<div class='statusElement'>
-				<span class='label' title='Status of the voter record database'>DB Status</span>
-		    <span class='statusValue' id='dbStatus' title='Status of the voter record database'>&nbsp;</span>
-			</div>
-			<div class='statusElement'>
-				<span class='label' title='Voter record database creation date'>DB Date</span>
-		    <span class='statusValue' id='dbDate title='Voter record database creation date''>&nbsp;</span>
-			</div>
-			</div> <!-- status block -->
 
-	    <div class='mainBody'>
-	    </div>
+	 <div class='mainBody'>
+		 <ul id="tabs">
+			 <li><a id="tab1">DB Management</a></li>
+			 <li><a id="tab2">Tab 2</a></li>
+			 <li><a id="tab3">Tab 3</a></li>
+			 <li><a id="tab4">Tab 4</a></li>
+		 </ul>
+		<div class="container">
+          <div class="tabBlock" id="tab1C">
+					<div class='status'>
+						<div class='statusElement'>
+							<span class='label' title='Name of the voter list source file'>CSV File Name</span>
+							<span class='statusValue' id='csvFileName' title='Name of the voter list source file'>&nbsp;</span>
+						</div>
+						<div class='statusElement'>
+							<span class='label' title='last modified date of the source file'>CSV File Date</span>
+		   				<span class='statusValue' id='csvFileDate' title='Last modified date of the source file'>&nbsp;</span>
+						</div>
+						<div class='statusElement'>
+							<span class='label' title='Number of voter records'>Number Of Records</span>
+							<span class='statusValue' id='numberOfRecords' title='Number of voter records'>&nbsp;</span>
+						</div>
+						<div class='statusElement'>
+							<span class='label' title='Number of fields per record'>Number Of Fields</span>
+		      			<span class='statusValue' id='numberOfFields' title='Number of fields per record'>&nbsp;</span>
+						</div>
+						<div class='statusElement'>
+							<span class='label' title='Status of the voter record database'>DB Status</span>
+		      			<span class='statusValue' id='dbStatus' title='Status of the voter record database'>&nbsp;</span>
+						</div>
+						<div class='statusElement'>
+							<span class='label' title='Voter record database creation date'>DB Date</span>
+		      			<span class='statusValue' id='dbDate title='Voter record database creation date''>&nbsp;</span>
+						</div>
+					</div> <!-- status block -->
+			 </div> <!-- db management -->
+
+          <div class="tabBlock" id="tab2C">
+			 	Tab 2 content
+			 </div> <!-- tab2 -->
+
+          <div class="tabBlock" id="tab3C">
+			 	Tab 3 content
+			 </div> <!-- tab3 -->
+
+          <div class="tabBlock" id="tab4C">
+			 	Tab 4 content
+			 </div> <!-- tab4 -->
+         
+  		</div> <!-- container  -->
+	 </div> <!-- mainBody -->
     </div> <!-- controls -->
 
    <footer>

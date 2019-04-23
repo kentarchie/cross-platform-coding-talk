@@ -34,6 +34,7 @@ $(document).ready(function()
 	setStatus();
 	Utils.logger('ready: FINISHED ');
 	Settings.set('UVM.dbSavePath','');
+	tabSetup();
 }); // ready function
 
 function setStatus()
@@ -104,3 +105,22 @@ function makeDB(jsonObj)
    let queriesDir = Settings.get('UVM.queriesDir');
 	Utils.logger('makeDB: dbDir = :%s: queriesDir = :%s:',dbDir,queriesDir);
 } // makeDB
+
+function tabSetup()
+{
+	$('#tabs li a:not(:first)').addClass('inactive');
+	$('.tabBlock').hide();
+	$('.tabBlock:first').show();
+    
+	$('#tabs li a').click(function()
+	{
+		var t = $(this).attr('id');
+  		if($(this).hasClass('inactive')) { //this is the start of our condition 
+    		$('#tabs li a').addClass('inactive');           
+    		$(this).removeClass('inactive');
+    
+    		$('.tabBlock').hide();
+    		$('#'+ t + 'C').fadeIn('slow');
+ 		}
+	});
+} // tabSetup
