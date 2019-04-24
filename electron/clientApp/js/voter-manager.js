@@ -11,6 +11,7 @@ const Settings = require('electron').remote.require('electron-settings');
 
 let CliData = remote.getCurrentWindow().CliData; // parameters from the command line
 let Utils = null;
+let UserIDFields = ["District","Precinct","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","City","zip"];
 
 $(document).ready(function()
 {
@@ -92,11 +93,21 @@ function getCSVFile ()
 			    $('#numberOfFields').html(Object.keys(jsonObj[0]).length);
 				 Settings.set('UVM.numberOfRecords',jsonObj.length);
 				 Settings.set('UVM.numberOfFields',Object.keys(jsonObj[0]).length);
+       		 makeDB(jsonObj);
 			    //Utils.logger('jsonObj[0]: ' + JSON.stringify(jsonObj[0],null,'\t'));
 	    });
-       makeDB(jsonObj);
   }); // showOpenDialog
 } // getCSVFile
+
+function makeUID(record)
+{
+	let uid = '';
+	for(var j=0; j< UserIDFields.length; j++) {
+		uid += jsonObj[i][UserIDFields[j]];
+	}
+	uid = uid.toLowerCase();
+	return uid;
+} // makeUID
 
 function makeDB(jsonObj)
 {
@@ -104,6 +115,26 @@ function makeDB(jsonObj)
    let dbDir = Settings.get('UVM.dbDir');
    let queriesDir = Settings.get('UVM.queriesDir');
 	Utils.logger('makeDB: dbDir = :%s: queriesDir = :%s:',dbDir,queriesDir);
+	Utils.logger('makeDB: jsonObj.length= %d',jsonObj.length);
+	let uidTable = {}
+	for(var i=0; i< jsonObj.length; i++) {
+		let uid = makeUID(jsonObj[i]);
+		//Utils.logger('makeDB: uid = %s',uid);
+
+		uidTable[uid] += (uidTable[uid]) ? 1 : 0;
+	}
+	let numberIds = Object.keys(jsonObj).length;
+	let dupIds = 0;
+	let keys = Object.keys(uidTable);
+	for(var i=0; i< keys.length; i++) {
+		if(uidTable[keys[i]] > 0) {
+			dupIds++;
+			Utils.logger('makeDB: dup uid = :%s: count = %d',keys[i],uidTable[keys[i]]);
+		}
+	}
+	Utils.logger('makeDB: dup count = %d',dupIds);
+	Utils.logger('makeDB: uidTable.length = %d',numberIds);
+	
 } // makeDB
 
 function tabSetup()
