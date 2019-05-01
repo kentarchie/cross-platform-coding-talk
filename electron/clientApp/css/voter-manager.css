@@ -61,6 +61,12 @@ div.statusElement:nth-child(n+2) {
 	flex-direction: row;
 }
 
+#queryResults {
+	width: 20%;
+	height: 20%;
+	background-color: yellow;
+}
+
 footer {
     border-top:1px solid green;
     width:100%;

@@ -4,8 +4,9 @@
   "description": "Manipulate voter data, generate various lists, record data",
   "main": "./mainJS/serverMain.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "./node_modules/.bin/electron ."
+    "test": "echo \"Error: no test specified\" && exit 1"
+    ,"start": "NODE_ENV=dev electron mainJS/serverMain.js"
+    ,"build": "NODE_ENV=prod electron-builder"
   },
   "repository": {
     "type": "git",

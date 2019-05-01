@@ -8,10 +8,12 @@ const {dialog} = require('electron').remote;
 const dateFormat = require('dateformat');
 const csv=require('csvtojson');
 const Settings = require('electron').remote.require('electron-settings');
+const DataStore = require('nedb');  
 
 let CliData = remote.getCurrentWindow().CliData; // parameters from the command line
 let Utils = null;
-let UserIDFields = ["District","Precinct","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","City","zip"];
+let UserIDFields = ["Precinct","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","City","zip"];
+let VoterDB = null;
 
 $(document).ready(function()
 {
@@ -31,6 +33,16 @@ $(document).ready(function()
 
 	$('#loadingBlock').hide();
 	$('#controls').css('display','show');
+
+	$('#runAgeQuery').click((ev) => {
+		Utils.logger('runAgeQuery clicked');
+		voterDB.find({ Age: { $lt: 50 }}, function(err, docs) {  
+    		docs.forEach(function(d) {
+      		Utils.logger('runAgeQuery: address:', d.Address);
+				$('#queryResults').html( $('#queryResults').html() + d.Address + '<br />')
+    		});
+		});
+	});
 
 	setStatus();
 	Utils.logger('ready: FINISHED ');
@@ -103,38 +115,80 @@ function makeUID(record)
 {
 	let uid = '';
 	for(var j=0; j< UserIDFields.length; j++) {
-		uid += jsonObj[i][UserIDFields[j]];
+		uid += record[UserIDFields[j]];
 	}
 	uid = uid.toLowerCase();
 	return uid;
 } // makeUID
+
+function changeToNumber(record,field) 
+{ 
+	if(record[field] && (typeof record[field] == 'string')) {
+		record[field] = Number(record[field]);
+	}
+} // changeToNumber
 
 function makeDB(jsonObj)
 {
 	Utils.logger('makeDB: START ');
    let dbDir = Settings.get('UVM.dbDir');
    let queriesDir = Settings.get('UVM.queriesDir');
-	Utils.logger('makeDB: dbDir = :%s: queriesDir = :%s:',dbDir,queriesDir);
-	Utils.logger('makeDB: jsonObj.length= %d',jsonObj.length);
+	Utils.logger('makeDB: dbDir = :%s: queriesDir = :%s: jsonObj.length = %d',dbDir,queriesDir,jsonObj.length);
 	let uidTable = {}
 	for(var i=0; i< jsonObj.length; i++) {
 		let uid = makeUID(jsonObj[i]);
+		jsonObj[i]['uid'] = uid;
+		changeToNumber(jsonObj[i],'Age');
+		changeToNumber(jsonObj[i],'Congressional');
+		changeToNumber(jsonObj[i],'Senate');
+		changeToNumber(jsonObj[i],'Representative');
+		changeToNumber(jsonObj[i],'County_Forest_District');
 		//Utils.logger('makeDB: uid = %s',uid);
 
-		uidTable[uid] += (uidTable[uid]) ? 1 : 0;
+		uidTable[uid] += (uidTable[uid]) ? `${uidTable[uid]}, ${i}` : -1;
 	}
 	let numberIds = Object.keys(jsonObj).length;
 	let dupIds = 0;
 	let keys = Object.keys(uidTable);
 	for(var i=0; i< keys.length; i++) {
-		if(uidTable[keys[i]] > 0) {
+		if(uidTable[keys[i]].toString().includes(',')) {
 			dupIds++;
 			Utils.logger('makeDB: dup uid = :%s: count = %d',keys[i],uidTable[keys[i]]);
 		}
 	}
-	Utils.logger('makeDB: dup count = %d',dupIds);
-	Utils.logger('makeDB: uidTable.length = %d',numberIds);
-	
+	Utils.logger('makeDB: dup count = %d uidTable.length = %d',dupIds,numberIds);
+	if(dupIds === 0) {
+		if( Settings.get('UVM.nedbCreated') || Settings.get('UVM.nedbLoaded')) {
+			if(window.confirm('Do you want to delete the current voter db, this cannot be undone')) {
+				//Settings.set('UVM.nedbCreated',true) Settings.set('UVM.nedbLoaded',true)
+				// remove existing DB
+				voterDB.remove({ },{ multi:true},
+				function(err,numRemoved) {
+					voterDB.loadDatabase(function(err) {
+						Utils.logger('DB removed numRemoved = %d',numRemoved);
+					})
+					});
+				} // confirm remove DB
+		} // db already exists
+		voterDB = new DataStore({ 
+			filename: Settings.get('UVM.dbDir') + '/voters.db'
+			,autoload: true
+		});
+		Settings.set('UVM.nedbCreated',true);
+		$('#dbStatus').html('Created');
+		Utils.logger('makeDB: db created');
+		for(var i=0; i< jsonObj.length; i++) {
+			voterDB.insert(jsonObj[i], function(err, doc) {  
+    			if((i % 500) == 0) Utils.logger('makeDB: Inserted', doc.name, 'with ID', doc._id);
+			});
+		}
+		Settings.set('UVM.nedbLoaded',true);
+		Utils.logger('makeDB: db loaded');
+		$('#dbStatus').html('Loaded');
+	}
+	else {
+		Utils.logger('makeDB: DB creation failed due to duplicate ids');
+	}
 } // makeDB
 
 function tabSetup()

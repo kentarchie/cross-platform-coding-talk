@@ -35,8 +35,8 @@ function createMainWindow()
     //Utils.logger('createWindow: Utils.logger isMain() -> %s', Utils.isMain());
 
     Utils.logger('createWindow: argv.debug ->%s', argv.debug);
-    let windowWidth =  (Settings.has('UVM.windowWidth'))  ? Settings.get('UVM.windowWidth')  : Constants.DEFAULT_WINDOW_WIDTH;
-    let windowHeight = (Settings.has('UVM.windowHeight')) ? Settings.get('UVM.windowHeight') : Constants.DEFAULT_WINDOW_HEIGHT;
+    let windowWidth =  Settings.get('UVM.windowWidth');
+    let windowHeight = Settings.get('UVM.windowHeight');
     Utils.logger('createWindow config values: width :%d: height :%d:',windowWidth,windowHeight);
 
     if(CliData.debug)  {
@@ -82,14 +82,8 @@ function createMainWindow()
 } // createMainWindow
 
 app.on('ready', () => {
-  let userDataPath = app.getPath ('userData');
-  Utils.logger('ready: userData = :%s:',userDataPath);
-  if(!Settings.has('UVM.dbDir'))      Settings.set('UVM.dbDir',userDataPath+'/DB');
-  else Utils.logger('ready: userDataPath already set is :%s:',userDataPath);
-  Utils.logger('ready: dbDir in main is :%s:',Settings.get('UVM.dbDir'));
-
-  if(!Settings.has('UVM.queriesDir')) Settings.set('UVM.queriesDir',userDataPath+'/Queries');
-  createMainWindow();
+	settingsInit(app);
+	createMainWindow();
 });
 
 //quit the app once closed
@@ -193,3 +187,22 @@ function openAboutWindow()
 
 	AboutWindow.on('closed', () => { AboutWindow = null; });
 } // openAboutWindow
+
+function settingsInit(app)
+{
+	if (!Settings.has('UVM.windowWidth'))  Settings.set('UVM.windowWidth',Constants.DEFAULT_WINDOW_WIDTH);
+	if (!Settings.has('UVM.windowHeight'))  Settings.set('UVM.windowHeight',Constants.DEFAULT_WINDOW_HEIGHT);
+
+	if(!Settings.has('UVM.nedbCreated')) Settings.set('UVM.nedbCreated',false);
+	if(!Settings.has('UVM.nedbLoaded')) Settings.set('UVM.nedbLoaded',false);
+	if(!Settings.has('UVM.nedbLoaded')) Settings.set('UVM.nedbLoaded',false);
+
+	//Settings.set('UVM.csvFileName',chosenFile);
+	//Settings.set('UVM.csvFileDate',formatted);
+	//Settings.set('UVM.numberOfRecords',jsonObj.length);
+	//Settings.set('UVM.numberOfFields',Object.keys(jsonObj[0]).length);
+
+	let userDataPath = app.getPath ('userData');
+	if(!Settings.has('UVM.dbDir')) Settings.set('UVM.dbDir',userDataPath+'/DB');
+	if(!Settings.has('UVM.queriesDir')) Settings.set('UVM.queriesDir',userDataPath+'/Queries');
+} // settingsInit
