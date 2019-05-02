@@ -18,7 +18,7 @@
 		 <ul id="tabs">
 			 <li><a id="tab1">DB Management</a></li>
 			 <li><a id="tab2">Queries</a></li>
-			 <li><a id="tab3">Tab 3</a></li>
+			 <li><a id="tab3">Walk Lists</a></li>
 			 <li><a id="tab4">Tab 4</a></li>
 		 </ul>
 		<div class="container">
@@ -49,18 +49,37 @@
 		      			<span class='statusValue' id='dbDate title='Voter record database creation date''>&nbsp;</span>
 						</div>
 					</div> <!-- status block -->
-			 </div> <!-- db management -->
+			 </div> <!-- Tab 1 db management -->
 
           <div class="tabBlock" id="tab2C">
 			 	<h2>Queries</h2>
 				<button type='button' id='runAgeQuery' name='runAgeQuery'>Run Age Query</button>
 				<div id='queryResults'>
 				</div>
-			 </div> <!-- tab2 -->
+			 </div> <!-- tab2  Queries-->
 
           <div class="tabBlock" id="tab3C">
-			 	Tab 3 content
-			 </div> <!-- tab3 -->
+			 	<h2>Walk Lists</h2>
+				<form>
+					<section>
+						<ul id='addressList'>
+						<ul id='selectedAddresses'>
+						</ul>
+					</section>
+					<section>
+						<button type='button' id='ageSelect' name='ageSelect'> Select Age Filter</button>
+						<button type='button' id='makeWalkList' name='makeWalkList'> Make Walk List</button>
+					</section>
+
+					<section>
+						<button type='button' id='selectWalkListDir' name='selectWalkListDir'> Select Directory for Walk Lists</button>
+						<div id='walkListDir'></div>
+
+						<label for='walkListName'>Walk List Name</label>
+						<input type='text' id='walkListName' name='walkListName' />
+					</section>
+				</form>
+			 </div> <!-- tab3 WalkLIsts-->
 
           <div class="tabBlock" id="tab4C">
 			 	Tab 4 content

@@ -15,6 +15,16 @@ let Utils = null;
 let UserIDFields = ["Precinct","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","City","zip"];
 let VoterDB = null;
 
+const UNIQUE_ADDRESSES = {
+   locale: 'en_US'
+   ,strength: 3
+   ,caseLevel: false
+   ,caseFirst: 'off' 
+   ,numericOrdering: false
+   ,alternate: 'non-ignorable'
+   ,backwards: false
+};
+
 $(document).ready(function()
 {
 	Utils = new Utilities(CliData);
@@ -33,6 +43,10 @@ $(document).ready(function()
 
 	$('#loadingBlock').hide();
 	$('#controls').css('display','show');
+
+	$('#selectWalkListDir').click((ev) => {
+		selectWalkListDir()
+	});
 
 	$('#runAgeQuery').click((ev) => {
 		Utils.logger('runAgeQuery clicked');
@@ -209,3 +223,26 @@ function tabSetup()
  		}
 	});
 } // tabSetup
+
+// Walk Lists
+
+function selectWalkListDir()
+{
+    var path = dialog.showOpenDialog(
+	 	{ properties: ['openDirectory'] }
+	 	,(fileNames) => {
+    	// fileNames is an array that contains all the selected
+    	if(fileNames === undefined){
+        	Utils.logger("selectWalkListDir: No folder selected");
+        	return;
+    	}
+	 	if(fileNames.length == 0) {
+	    	Utils.logger('selectWalkListDir: No folder selected');
+	    	return;
+	 	}
+    	let chosenDir = fileNames[0];
+	 	Utils.logger('selectWalkListDir: folder selected =:%s:',chosenDir);
+		$('#walkListDir').html(chosenDir);
+	 }); // folder selection
+	 Utils.logger('selectWalkListDir: path =:%s:',path);
+} // selectWalkListDir
