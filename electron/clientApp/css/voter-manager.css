@@ -57,6 +57,24 @@ div.statusElement:nth-child(n+2) {
 
 .label { font-weight: bold; font-variant: small-caps; }
 
+#walkListDir {
+	width:500px;
+	height:300px;
+	border : 1px solid green;
+	background-color:yellow;
+	overflow : auto;
+}
+
+.addressLI {
+	margin-left:20px;
+	font-family:monospace;
+}
+.namesLI {
+	margin-left:20px;
+	font-weight: bold;
+}
+
+
 .mainBody {
 	flex-direction: row;
 }

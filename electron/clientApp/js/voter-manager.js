@@ -14,6 +14,7 @@ let CliData = remote.getCurrentWindow().CliData; // parameters from the command 
 let Utils = null;
 let UserIDFields = ["Precinct","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","City","zip"];
 let VoterDB = null;
+let AddressIndex = {};
 
 const UNIQUE_ADDRESSES = {
    locale: 'en_US'
@@ -45,7 +46,12 @@ $(document).ready(function()
 	$('#controls').css('display','show');
 
 	$('#selectWalkListDir').click((ev) => {
-		selectWalkListDir()
+		selectWalkListDir();
+	});
+
+	$('#makeWalkList').click((ev) => {
+		//makeWalkList();
+		loadAddresses();
 	});
 
 	$('#runAgeQuery').click((ev) => {
@@ -246,3 +252,54 @@ function selectWalkListDir()
 	 }); // folder selection
 	 Utils.logger('selectWalkListDir: path =:%s:',path);
 } // selectWalkListDir
+
+function loadAddresses()
+{
+	voterDB.find({}, function(err, docs) {  
+			Utils.logger('loadAddresses: docs.length =:%d:',docs.length);
+    		docs.forEach(function(d) {
+				let key = d['Address'].toLowerCase().replace(/\s/g,'');
+      		//Utils.logger('loadAddresses: :%s:', key);
+				if(key in AddressIndex) {
+					AddressIndex[key]['names'].push(d['LastName'] + '-' + d['FirstName']);
+      			//Utils.logger('loadAddresses: added another name');
+				}
+				else {
+      			//Utils.logger('loadAddresses: adding new name');
+					let newData = new Object();
+					newData['address'] = d['Address'];
+					newData['names'] = [];
+					newData['names'].push(d['LastName'] + '-' + d['FirstName']);
+					AddressIndex[key] = newData;
+				}
+    		}); // docs loop
+			Utils.logger('loadAddresses: FINAL num unique addresses =:%d:',Object.keys(AddressIndex).length);
+			let lines = [];
+			for (var key in AddressIndex) {
+	 			Utils.logger('makeWalkList: key =:%s:',key);
+				lines.push(`<li data-address='${key}'>`);
+				lines.push("<span class='addressLI'>"+AddressIndex[key]['address']+"</span>"); 
+				lines.push("<span  class='namesLI'>" + AddressIndex[key]['names'].join(',') + "</li>");
+				lines.push('</li>');
+			}
+			$('#walkListDir ul').html(lines.join(''));
+	}); // find
+} // loadAddresses
+
+function makeWalkList()
+{
+	Utils.logger('makeWalkList: START');
+	if(Object.keys(AddressIndex).length == 0) {
+		loadAddresses();
+		Utils.logger('makeWalkList: loadAddresses DONE');
+	}
+	let lines = [];
+	for (var key in AddressIndex) {
+	 	Utils.logger('makeWalkList: key =:%s:',key);
+		lines.push(`<li data-address='${key}'>`);
+		lines.push("<span class='addressLI'>"+AddressIndex[key]['address']+"</span>"); 
+		lines.push("<span  class='namesLI'>" + AddressIndex[key]['names'].join(',') + "</li>");
+		lines.push('</li>');
+	}
+	$('#walkListDir ul').html(lines.join(''));
+} // makeWalkList
