@@ -50,8 +50,8 @@ $(document).ready(function()
 	});
 
 	$('#makeWalkList').click((ev) => {
-		//makeWalkList();
 		loadAddresses();
+		//makeWalkList();
 	});
 
 	$('#runAgeQuery').click((ev) => {
@@ -68,6 +68,14 @@ $(document).ready(function()
 	Utils.logger('ready: FINISHED ');
 	Settings.set('UVM.dbSavePath','');
 	tabSetup();
+
+	let voterDBFile = Settings.get('UVM.dbDir') + '/voters.db';
+	if (fsLib.existsSync(voterDBFile)) { 
+		voterDB = new DataStore({ 
+			filename: Settings.get('UVM.dbDir') + '/voters.db'
+			,autoload: true
+		});
+	} 
 }); // ready function
 
 function setStatus()
@@ -274,15 +282,7 @@ function loadAddresses()
 				}
     		}); // docs loop
 			Utils.logger('loadAddresses: FINAL num unique addresses =:%d:',Object.keys(AddressIndex).length);
-			let lines = [];
-			for (var key in AddressIndex) {
-	 			Utils.logger('makeWalkList: key =:%s:',key);
-				lines.push(`<li data-address='${key}'>`);
-				lines.push("<span class='addressLI'>"+AddressIndex[key]['address']+"</span>"); 
-				lines.push("<span  class='namesLI'>" + AddressIndex[key]['names'].join(',') + "</li>");
-				lines.push('</li>');
-			}
-			$('#walkListDir ul').html(lines.join(''));
+			makeWalkList();
 	}); // find
 } // loadAddresses
 
@@ -297,6 +297,7 @@ function makeWalkList()
 	for (var key in AddressIndex) {
 	 	Utils.logger('makeWalkList: key =:%s:',key);
 		lines.push(`<li data-address='${key}'>`);
+		lines.push("<input type='checkbox' class='walkList' />"); 
 		lines.push("<span class='addressLI'>"+AddressIndex[key]['address']+"</span>"); 
 		lines.push("<span  class='namesLI'>" + AddressIndex[key]['names'].join(',') + "</li>");
 		lines.push('</li>');
