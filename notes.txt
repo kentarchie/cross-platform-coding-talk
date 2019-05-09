@@ -1,0 +1,41 @@
+set up and installation notes
+
+WSL
+
+sudo apt install gvim
+git
+
+But this would be a difficult setup as the WSL doesn't support graphic applications.
+This should be done by installing and setting up an X11 server.
+A Windows product called X410 is reccomended
+Some other links are:
+X410
+https://token2shell.com/x410/
+
+some notes on installing things on WSL
+https://gist.github.com/wsargent/072319c2100ac0aea4305d6f6eeacc08#access-x11-applications
+
+Windows
+First install Node and NPM
+get installer for NodeJS on Windows
+run the installer
+
+Open cmd window and try
+node --version
+npm --version
+
+https://treehouse.github.io/installation-guides/windows/node-windows.html
+
+getting started https://nodejs.org/en/docs/guides/getting-started-guide/
+
+NodeJS installers
+https://nodejs.org/en/download/
+
+then install electron using npm
+big choice install local or global
+installing local may result in smaller final executable, also allows different
+projects to be using different versions
+this is the choice GitHub reccomends.
+Installing global is a little more convenient, only stores one copy 
+https://electronjs.org/docs/tutorial/installation
+
