@@ -38,4 +38,3 @@ projects to be using different versions
 this is the choice GitHub reccomends.
 Installing global is a little more convenient, only stores one copy 
 https://electronjs.org/docs/tutorial/installation
-

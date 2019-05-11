@@ -286,6 +286,18 @@ function loadAddresses()
 	}); // find
 } // loadAddresses
 
+/*
+	 	Utils.logger('makeWalkList: key =:%s:',key);
+      rows.push("<div class='rowHead'>");
+      rows.push("<div class='walkColumn'>");
+		rows.push(`<input type='checkbox' class='walkList' data-address='${key}/>`); 
+		rows.push("<span class='address'>"+AddressIndex[key]['address']+"</span>"); 
+      rows.push("</div>"); // leftSide
+      rows.push("<div class='walkColumn'>");
+		rows.push("<span class='names'>" + AddressIndex[key]['names'].join(',') + "</span>");
+      rows.push("</div>"); // rightSide
+      rows.push("</div>"); // rowHead
+*/
 function makeWalkList()
 {
 	Utils.logger('makeWalkList: START');
@@ -293,14 +305,17 @@ function makeWalkList()
 		loadAddresses();
 		Utils.logger('makeWalkList: loadAddresses DONE');
 	}
-	let lines = [];
+	let rows = [];
 	for (var key in AddressIndex) {
-	 	Utils.logger('makeWalkList: key =:%s:',key);
-		lines.push(`<li data-address='${key}'>`);
-		lines.push("<input type='checkbox' class='walkList' />"); 
-		lines.push("<span class='addressLI'>"+AddressIndex[key]['address']+"</span>"); 
-		lines.push("<span  class='namesLI'>" + AddressIndex[key]['names'].join(',') + "</li>");
-		lines.push('</li>');
+      rows.push("<tr>"); 
+      rows.push("<td>");
+		rows.push(`<input type='checkbox' class='walkList' data-address='${key}/>`); 
+		rows.push("<span class='address'>"+AddressIndex[key]['address']+"</span>"); 
+      rows.push("</td>");
+      rows.push("<td>");
+		rows.push("<span class='names'>" + AddressIndex[key]['names'].join(', ') + "</span>");
+      rows.push("</td>");
+      rows.push("</tr>"); 
 	}
-	$('#walkListDir ul').html(lines.join(''));
+	$('#walkListBody').html(rows.join(''));
 } // makeWalkList

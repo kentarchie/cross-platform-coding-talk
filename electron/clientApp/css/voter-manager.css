@@ -57,23 +57,26 @@ div.statusElement:nth-child(n+2) {
 
 .label { font-weight: bold; font-variant: small-caps; }
 
-#walkListDir {
-	width:500px;
-	height:300px;
+.walkListDir {
+	width:70%;
+	height:50%;
 	border : 1px solid green;
-	background-color:yellow;
+	background-color:beige;
 	overflow : auto;
 }
+.walkListDir table {
+   border-collapse: collapse; 
+}
+#walkListBody tr {
+    border-bottom: 1pt solid rgb(170, 50, 220, .6);
+}
 
-.addressLI {
-	margin-left:20px;
+.address {
 	font-family:monospace;
 }
-.namesLI {
-	margin-left:20px;
+.names {
 	font-weight: bold;
 }
-
 
 .mainBody {
 	flex-direction: row;
