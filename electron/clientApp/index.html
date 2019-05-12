@@ -62,11 +62,6 @@
 			 	<h2>Walk Lists</h2>
 				<form>
 					<section>
-						<ul id='addressList'>
-						<ul id='selectedAddresses'>
-						</ul>
-					</section>
-					<section>
 						<button type='button' id='ageSelect' name='ageSelect'> Select Age Filter</button>
 						<button type='button' id='makeWalkList' name='makeWalkList'> Make Walk List</button>
 					</section>
@@ -74,18 +69,9 @@
 					<section>
 						<button type='button' id='selectWalkListDir' name='selectWalkListDir'> Select Directory for Walk Lists</button>
 						<div class='walkListDir'>
-						<table>
-                      <thead>
-                      </thead>
-                      <tbody id='walkListBody'>
-                      </tbody>
-                  </table>
-                  <!--
-						<div id='walkListDir'>
-                     <div id='addressesLeft' class="address"></div>
-                     <div id='namesRight' class="names"></div>
-						</div>
-                  -->
+                      <ul id='addressList' class='addressList'>
+                      </ul>
+                  </div>
 
 						<label for='walkListName'>Walk List Name</label>
 						<input type='text' id='walkListName' name='walkListName' />

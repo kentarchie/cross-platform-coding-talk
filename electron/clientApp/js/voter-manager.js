@@ -49,6 +49,10 @@ $(document).ready(function()
 		selectWalkListDir();
 	});
 
+	$('#addressList').click((ev) => {
+		selectAddress(ev);
+	});
+
 	$('#makeWalkList').click((ev) => {
 		loadAddresses();
 		//makeWalkList();
@@ -307,15 +311,18 @@ function makeWalkList()
 	}
 	let rows = [];
 	for (var key in AddressIndex) {
-      rows.push("<tr>"); 
-      rows.push("<td>");
-		rows.push(`<input type='checkbox' class='walkList' data-address='${key}/>`); 
-		rows.push("<span class='address'>"+AddressIndex[key]['address']+"</span>"); 
-      rows.push("</td>");
-      rows.push("<td>");
-		rows.push("<span class='names'>" + AddressIndex[key]['names'].join(', ') + "</span>");
-      rows.push("</td>");
-      rows.push("</tr>"); 
+      let humanAddress = AddressIndex[key]['address'];
+		rows.push(`<li class='walkList' />`); 
+		rows.push(`<span class='address' data-address='${key}'>${humanAddress}</span>`); 
+      rows.push("</li>");
 	}
-	$('#walkListBody').html(rows.join(''));
+	$('#addressList').html(rows.join(''));
 } // makeWalkList
+
+function selectAddress(ev)
+{
+    let key = ev.target.dataset['address'];
+    Utils.logger('selectAddress: data key=:%s:',key);
+    //ev.target.disabled=true;
+    ev.target.setAttribute("disabled", "disabled");
+} // selectAddress
