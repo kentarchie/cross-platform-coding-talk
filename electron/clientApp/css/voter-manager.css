@@ -57,17 +57,28 @@ div.statusElement:nth-child(n+2) {
 
 .label { font-weight: bold; font-variant: small-caps; }
 
-.walkListDir {
-	width:70%;
+.walkLists {
+	display:flex;
+}
+.walkSection {
+}
+.walkListSource {
+}
+.walkListDest {
+}
+.walkListBlock {
+	width:40%;
 	height:50%;
 	border : 1px solid green;
 	background-color:beige;
 	overflow : auto;
+	flex:1;
 }
 .addressList {
     list-style:none;
     cursor:pointer;
 }
+
 .addressList li:disabled {
   background-color: #ccc;
 }

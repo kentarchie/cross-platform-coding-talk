@@ -49,8 +49,9 @@ $(document).ready(function()
 		selectWalkListDir();
 	});
 
-	$('#addressList').click((ev) => {
+	$('.addressList').click((ev) => {
 		selectAddress(ev);
+		Utils.logger('ready: selectAddress attached');
 	});
 
 	$('#makeWalkList').click((ev) => {
@@ -290,18 +291,6 @@ function loadAddresses()
 	}); // find
 } // loadAddresses
 
-/*
-	 	Utils.logger('makeWalkList: key =:%s:',key);
-      rows.push("<div class='rowHead'>");
-      rows.push("<div class='walkColumn'>");
-		rows.push(`<input type='checkbox' class='walkList' data-address='${key}/>`); 
-		rows.push("<span class='address'>"+AddressIndex[key]['address']+"</span>"); 
-      rows.push("</div>"); // leftSide
-      rows.push("<div class='walkColumn'>");
-		rows.push("<span class='names'>" + AddressIndex[key]['names'].join(',') + "</span>");
-      rows.push("</div>"); // rightSide
-      rows.push("</div>"); // rowHead
-*/
 function makeWalkList()
 {
 	Utils.logger('makeWalkList: START');
@@ -316,13 +305,20 @@ function makeWalkList()
 		rows.push(`<span class='address' data-address='${key}'>${humanAddress}</span>`); 
       rows.push("</li>");
 	}
-	$('#addressList').html(rows.join(''));
+	$('#sourceAddressList').html(rows.join(''));
 } // makeWalkList
 
 function selectAddress(ev)
 {
-    let key = ev.target.dataset['address'];
+    Utils.logger('selectAddress: START:');
+	 let target = ev.target;
+    let key = target.dataset['address'];
+	 let humanAddress = $(target).html();
     Utils.logger('selectAddress: data key=:%s:',key);
     //ev.target.disabled=true;
-    ev.target.setAttribute("disabled", "disabled");
+    target.setAttribute("disabled", "disabled");
+	 $(target).css('display','none');
+		let li = $("<li class='walkList' />"); 
+		let span = $(`<span class='address' data-address='${key}'>${humanAddress}</span>`).appendTo(li); 
+		li.appendTo('#destAddressList'); 
 } // selectAddress

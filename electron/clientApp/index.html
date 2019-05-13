@@ -66,12 +66,18 @@
 						<button type='button' id='makeWalkList' name='makeWalkList'> Make Walk List</button>
 					</section>
 
-					<section>
+					<section class='walkSection'>
 						<button type='button' id='selectWalkListDir' name='selectWalkListDir'> Select Directory for Walk Lists</button>
-						<div class='walkListDir'>
-                      <ul id='addressList' class='addressList'>
-                      </ul>
-                  </div>
+						<div class='walkLists'>
+							<div class='walkListSource walkListBlock'>
+                      	<ul id='sourceAddressList' class='addressList'>
+                      	</ul>
+                  	</div>
+							<div class='walkListDest walkListBlock'>
+                      	<ul id='destAddressList' class='addressList'>
+                      	</ul>
+                  	</div>
+						</div>
 
 						<label for='walkListName'>Walk List Name</label>
 						<input type='text' id='walkListName' name='walkListName' />
