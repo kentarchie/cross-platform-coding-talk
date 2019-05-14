@@ -79,15 +79,27 @@ div.statusElement:nth-child(n+2) {
     cursor:pointer;
 }
 
-.addressList li:disabled {
-  background-color: #ccc;
+#saveWalkList:disabled,
+#saveWalkList[disabled]{
+  background-color: #cccccc;
+  color: #666666;
+}
+
+.newLI {
+	display:none;
+}
+.newLI span {
+	margin: 3px;
+}
+
+.listSectionTitle {
+	border: 1px solid black;
+	text-align:center;
 }
 
 .address {
 	font-family:monospace;
-}
-.names {
-	font-weight: bold;
+	font-size:large;
 }
 
 .mainBody {

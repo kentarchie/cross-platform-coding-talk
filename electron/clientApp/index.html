@@ -64,23 +64,31 @@
 					<section>
 						<button type='button' id='ageSelect' name='ageSelect'> Select Age Filter</button>
 						<button type='button' id='makeWalkList' name='makeWalkList'> Make Walk List</button>
+						<button type='button' id='saveWalkList' name='saveWalkList'> Save Walk List</button>
+						<button type='button' id='selectWalkListDir' name='selectWalkListDir'> Select Directory for Walk Lists</button>
+						<label for='walkListName'>Walk List Name</label>
+						<input type='text' id='walkListName' name='walkListName' />
 					</section>
 
 					<section class='walkSection'>
-						<button type='button' id='selectWalkListDir' name='selectWalkListDir'> Select Directory for Walk Lists</button>
 						<div class='walkLists'>
 							<div class='walkListSource walkListBlock'>
+								<div class='listSectionTitle'>
+									All Addresses (<span id='totalAddressCount'></span>)
+								</div>
                       	<ul id='sourceAddressList' class='addressList'>
                       	</ul>
                   	</div>
+
 							<div class='walkListDest walkListBlock'>
+								<div class='listSectionTitle'>
+									Selected Addresses (<span id='selectedAddressCount'>0</span>)
+								</div>
                       	<ul id='destAddressList' class='addressList'>
                       	</ul>
                   	</div>
 						</div>
 
-						<label for='walkListName'>Walk List Name</label>
-						<input type='text' id='walkListName' name='walkListName' />
 					</section>
 				</form>
 			 </div> <!-- tab3 WalkLists-->

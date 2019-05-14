@@ -37,6 +37,7 @@ $(document).ready(function()
     getCSVFile();
     Utils.logger('ready: voter db setup');
   });
+  $('#saveWalkList').prop("disabled",true);
 		  
   var copyRightYear = new Date().getFullYear();
   Utils.logger('init:  copyRightYear=:%s:',copyRightYear);
@@ -55,8 +56,11 @@ $(document).ready(function()
 	});
 
 	$('#makeWalkList').click((ev) => {
+		//$('#saveWalkList').prop("disabled",true);
 		loadAddresses();
-		//makeWalkList();
+	});
+	$('#saveWalkList').click((ev) => {
+		saveWalkList();
 	});
 
 	$('#runAgeQuery').click((ev) => {
@@ -270,6 +274,7 @@ function loadAddresses()
 {
 	voterDB.find({}, function(err, docs) {  
 			Utils.logger('loadAddresses: docs.length =:%d:',docs.length);
+			$('#totalAddressCount').html(docs.length);
     		docs.forEach(function(d) {
 				let key = d['Address'].toLowerCase().replace(/\s/g,'');
       		//Utils.logger('loadAddresses: :%s:', key);
@@ -311,14 +316,25 @@ function makeWalkList()
 function selectAddress(ev)
 {
     Utils.logger('selectAddress: START:');
-	 let target = ev.target;
-    let key = target.dataset['address'];
-	 let humanAddress = $(target).html();
+	 let selectedCount = parseInt($('#selectedAddressCount').html());
+    let key = ev.target.dataset['address'];
+	 let target = $(ev.target);
+	 let humanAddress = target.html();
     Utils.logger('selectAddress: data key=:%s:',key);
-    //ev.target.disabled=true;
-    target.setAttribute("disabled", "disabled");
-	 $(target).css('display','none');
-		let li = $("<li class='walkList' />"); 
-		let span = $(`<span class='address' data-address='${key}'>${humanAddress}</span>`).appendTo(li); 
-		li.appendTo('#destAddressList'); 
+	 let li = $("<li class='walkList newLI' />"); 
+	 let span = $(`<span class='address' data-address='${key}'>${humanAddress}</span>`).appendTo(li); 
+	 li.appendTo('#destAddressList'); 
+
+	 target.fadeOut( "slow", function() {
+	 	li.fadeIn( "slow", function() {
+			$('#selectedAddressCount').html(selectedCount+1);
+	 		$('#saveWalkList').prop("disabled",false)
+		                  .css("background-color",'lightgreen');
+  	 	});
+  	 });
 } // selectAddress
+
+function saveWalkList(ev)
+{
+	Utils.logger('saveWaLkList: START:');
+} // saveWalkList
