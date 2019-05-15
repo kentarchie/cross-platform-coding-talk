@@ -12,41 +12,61 @@ const DataStore = require('nedb');
 
 let CliData = remote.getCurrentWindow().CliData; // parameters from the command line
 let Utils = null;
-let UserIDFields = ["Precinct","LastName","LastNameSuffix","FirstName","MiddleName","HouseNumber","Direction","StreetName","Unit","City","zip"];
 let VoterDB = null;
 let AddressIndex = {};
 
-const UNIQUE_ADDRESSES = {
-   locale: 'en_US'
-   ,strength: 3
-   ,caseLevel: false
-   ,caseFirst: 'off' 
-   ,numericOrdering: false
-   ,alternate: 'non-ignorable'
-   ,backwards: false
-};
+let UserIDFields = ['Precinct','LastName','LastNameSuffix','FirstName','MiddleName','HouseNumber','Direction','StreetName','Unit','City','zip'];
+let NumberFields = ['Age' ,'Congressional' ,'Senate' ,'Representative' ,'County_Forest_District' ];
+let StatusFields = ['csvFileName', 'csvFileDate', 'numberOfRecords', 'numberOfFields'];
+let TrackingFields = [
+   {
+      'name'  : 'Home-Talked'
+      ,'type' : 'Boolean'
+      ,'default' : false
+   }
+   ,{
+      'name'  : 'NotHome'
+      ,'type' : 'Boolean'
+      ,'default' : false
+   }
+   ,{
+      'name'  : 'NotHome-LeftLit'
+      ,'type' : 'Boolean'
+      ,'default' : false
+   }
+   ,{
+      'name'  : 'Sign'
+      ,'type' : 'String'
+      ,'default' : 'No'
+   }
+   ,{
+      'name'  : 'Donation'
+      ,'type' : 'Number'
+      ,'default' : 0
+   }
+];
 
 $(document).ready(function()
 {
-	Utils = new Utilities(CliData);
-	Utils.logger('ready: START ');
-	//Utils.logger('ready: this is :%s:', (Utils.isMain()) ? 'Main' : 'Renderer');
+   Utils = new Utilities(CliData);
+   Utils.logger('ready: START ');
+   //Utils.logger('ready: this is :%s:', (Utils.isMain()) ? 'Main' : 'Renderer');
 
-  ipcRenderer.on('create-voter-db', (event, arg) => {
-    Utils.logger('ready: great-voter-db received');
-    getCSVFile();
-    Utils.logger('ready: voter db setup');
-  });
-  $('#saveWalkList').prop("disabled",true);
+   ipcRenderer.on('create-voter-db', (event, arg) => {
+      Utils.logger('ready: great-voter-db received');
+      getCSVFile();
+      Utils.logger('ready: voter db setup');
+   });
+   $('#saveWalkList').prop("disabled",true);
 		  
-  var copyRightYear = new Date().getFullYear();
-  Utils.logger('init:  copyRightYear=:%s:',copyRightYear);
-  $('.copyright span').html(copyRightYear);
+   var copyRightYear = new Date().getFullYear();
+   Utils.logger('init:  copyRightYear=:%s:',copyRightYear);
+   $('.copyright span').html(copyRightYear);
 
-	$('#loadingBlock').hide();
-	$('#controls').css('display','show');
+   $('#loadingBlock').hide();
+   $('#controls').css('display','show');
 
-	$('#selectWalkListDir').click((ev) => {
+   $('#selectWalkListDir').click((ev) => {
 		selectWalkListDir();
 	});
 
@@ -89,9 +109,7 @@ $(document).ready(function()
 
 function setStatus()
 {
-	let fields = [ 'csvFileName', 'csvFileDate', 'numberOfRecords', 'numberOfFields'];
-
-	fields.forEach((field) => {
+	StatusFields.forEach((field) => {
 		Utils.logger('setStatus: field=:%s:',field);
 		if(Settings.has('UVM.' + field)) {
 			let value = Settings.get('UVM.' + field);
@@ -109,54 +127,61 @@ function setStatus()
 // also update the status display
 function getCSVFile () 
 {
-    dialog.showOpenDialog((fileNames) => {
+   dialog.showOpenDialog((fileNames) => {
     // fileNames is an array that contains all the selected
     if(fileNames === undefined){
-        Utils.logger("No file selected");
-        return;
+       Utils.logger("No file selected");
+       return;
     }
-	 if(fileNames.length == 0) {
-	    Utils.logger('No file selected');
-	    return;
-	 }
+    if(fileNames.length == 0) {
+       Utils.logger('No file selected');
+       return;
+    }
     let chosenFile = fileNames[0];
-	 Utils.logger('ready: file selected =:%s:',chosenFile);
-	 Settings.set('UVM.csvFileName',chosenFile);
-
+    Utils.logger('ready: file selected =:%s:',chosenFile);
+    Settings.set('UVM.csvFileName',chosenFile);
+ 
     let pathParts = path.parse(chosenFile);
     let fileStats = fsLib.statSync(chosenFile);
-
+ 
     // display last modification date like 1st April, 2019
     let formatted = dateFormat( new Date(fileStats.mtime), "dS mmmm, yyyy");
-	 $('#csvFileDate').html(formatted);
-	 Settings.set('UVM.csvFileDate',formatted);
-			  
+    $('#csvFileDate').html(formatted);
+    Settings.set('UVM.csvFileDate',formatted);
+ 			  
     $('#csvFileName').html(pathParts.base);
-
+ 
     // display number of records and number of fields per record
-	  let jsonObj = [];
-	  csv()
-	    .fromFile(chosenFile)
-	    .then((jsonObj)=>{
-		      $('#numberOfRecords').html(jsonObj.length);
-			    $('#numberOfFields').html(Object.keys(jsonObj[0]).length);
-				 Settings.set('UVM.numberOfRecords',jsonObj.length);
-				 Settings.set('UVM.numberOfFields',Object.keys(jsonObj[0]).length);
-       		 makeDB(jsonObj);
-			    //Utils.logger('jsonObj[0]: ' + JSON.stringify(jsonObj[0],null,'\t'));
-	    });
-  }); // showOpenDialog
+    let jsonObj = [];
+    csv()
+       .fromFile(chosenFile)
+       .then((jsonObj)=>{
+          $('#numberOfRecords').html(jsonObj.length);
+          $('#numberOfFields').html(Object.keys(jsonObj[0]).length);
+          Settings.set('UVM.numberOfRecords',jsonObj.length);
+          Settings.set('UVM.numberOfFields',Object.keys(jsonObj[0]).length);
+          makeDB(jsonObj);
+          //Utils.logger('jsonObj[0]: ' + JSON.stringify(jsonObj[0],null,'\t'));
+       });
+   }); // showOpenDialog
 } // getCSVFile
 
 function makeUID(record)
 {
-	let uid = '';
+   let uid = '';
 	for(var j=0; j< UserIDFields.length; j++) {
 		uid += record[UserIDFields[j]];
 	}
 	uid = uid.toLowerCase();
 	return uid;
 } // makeUID
+
+function makeTrackingField(tracker,trackingFieldDef)
+{
+    let value = null;
+    value = trackingFieldDef['default'];
+    tracker[trackingFieldDef['name']] = value;
+} // makeTrackingField
 
 function changeToNumber(record,field) 
 { 
@@ -171,17 +196,21 @@ function makeDB(jsonObj)
    let dbDir = Settings.get('UVM.dbDir');
    let queriesDir = Settings.get('UVM.queriesDir');
 	Utils.logger('makeDB: dbDir = :%s: queriesDir = :%s: jsonObj.length = %d',dbDir,queriesDir,jsonObj.length);
-	let uidTable = {}
+	let uidTable = {};
+   
+   // add ids, covert number fields and add voter tracking fields
 	for(var i=0; i< jsonObj.length; i++) {
 		let uid = makeUID(jsonObj[i]);
 		jsonObj[i]['uid'] = uid;
-		changeToNumber(jsonObj[i],'Age');
-		changeToNumber(jsonObj[i],'Congressional');
-		changeToNumber(jsonObj[i],'Senate');
-		changeToNumber(jsonObj[i],'Representative');
-		changeToNumber(jsonObj[i],'County_Forest_District');
-		//Utils.logger('makeDB: uid = %s',uid);
+      NumberFields.forEach((field) => {
+		   changeToNumber(jsonObj[i],field);
+      });
+      jsonObj[i]['tracking'] = {};
+      TrackingFields.forEach((field) => {
+		   makeTrackingField(jsonObj[i]['tracking'],field);
+      });
 
+      // make a map of uids to check if we have duplicates
 		uidTable[uid] += (uidTable[uid]) ? `${uidTable[uid]}, ${i}` : -1;
 	}
 	let numberIds = Object.keys(jsonObj).length;
@@ -315,26 +344,33 @@ function makeWalkList()
 
 function selectAddress(ev)
 {
-    Utils.logger('selectAddress: START:');
-	 let selectedCount = parseInt($('#selectedAddressCount').html());
-    let key = ev.target.dataset['address'];
-	 let target = $(ev.target);
-	 let humanAddress = target.html();
-    Utils.logger('selectAddress: data key=:%s:',key);
-	 let li = $("<li class='walkList newLI' />"); 
-	 let span = $(`<span class='address' data-address='${key}'>${humanAddress}</span>`).appendTo(li); 
-	 li.appendTo('#destAddressList'); 
+   Utils.logger('selectAddress: START:');
+	let selectedCount = parseInt($('#selectedAddressCount').html());
+   let key = ev.target.dataset['address'];
+	let target = $(ev.target);
+	let humanAddress = target.html();
+   Utils.logger('selectAddress: data key=:%s:',key);
+	let li = $("<li class='walkList newLI' />"); 
+	let span = $(`<span class='address' data-address='${key}'>${humanAddress}</span>`).appendTo(li); 
+	li.appendTo('#destAddressList'); 
 
-	 target.fadeOut( "slow", function() {
+	target.fadeOut( "slow", function() {
 	 	li.fadeIn( "slow", function() {
 			$('#selectedAddressCount').html(selectedCount+1);
 	 		$('#saveWalkList').prop("disabled",false)
 		                  .css("background-color",'lightgreen');
   	 	});
-  	 });
+  	});
 } // selectAddress
 
 function saveWalkList(ev)
 {
-	Utils.logger('saveWaLkList: START:');
+   Utils.logger('saveWaLkList: START:');
+	let liList = $('#destAddressList li span'); 
+   let keyList = [];
+   liList.each((liIndex,li) => {
+      let key = $(li).data('address');
+      keyList.push(key);
+      Utils.logger('saveWalkList: data key=:%s:',key);
+   });
 } // saveWalkList

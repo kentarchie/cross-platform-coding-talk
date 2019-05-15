@@ -61,6 +61,8 @@ div.statusElement:nth-child(n+2) {
 	display:flex;
 }
 .walkSection {
+    width: 65%;
+    position: relative;
 }
 .walkListSource {
 }
