@@ -5,7 +5,7 @@
   "main": "./mainJS/serverMain.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "NODE_ENV=dev electron mainJS/serverMain.js",
+    "start": "node_modules/electron/dist/electron.exe mainJS/serverMain.js --debug",
     "build": "NODE_ENV=prod electron-builder"
   },
   "repository": {
@@ -30,6 +30,7 @@
     "dateformat": "^3.0.3",
     "electron-settings": "^3.2.0",
     "nedb": "^1.8.0",
+    "nedb-promises": "^3.0.5",
     "yargs": "^12.0.5"
   }
 }

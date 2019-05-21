@@ -4,14 +4,15 @@ const Datastore = require('nedb-promises');
 const Settings = require('electron-settings');
 
 const dbFactory = (fileName) => Datastore.create({
-  filename: `${process.env.NODE_ENV === 'dev' ? '.' : ${fileName}`, 
+  filename: `${process.env.NODE_ENV} === 'dev' ? '.' : ${fileName}`, 
   timestampData: true,
   autoload: true
 });
 
 const db = {
-  voterDB: dbFactory(Settings.get('UVM.dbDir') + 'voters.nedb'),
-  queries: dbFactory(Settings.get('UVM.dbDir') + 'queries.nedb')
+  voterDB      : dbFactory(Settings.get('UVM.dbDir') + '/voters.nedb')
+  ,housholdsDB : dbFactory(Settings.get('UVM.dbDir') + '/housholds.nedb')
+  ,queries     : dbFactory(Settings.get('UVM.dbDir') + '/queries.nedb')
 };
 module.exports = db;
 

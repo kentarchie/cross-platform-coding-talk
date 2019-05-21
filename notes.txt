@@ -38,3 +38,23 @@ projects to be using different versions
 this is the choice GitHub reccomends.
 Installing global is a little more convenient, only stores one copy 
 https://electronjs.org/docs/tutorial/installation
+
+
+Other notes
+Setup electron application
+
+https://electronjs.org/docs/tutorial/first-app
+https://medium.com/developers-writing/building-a-desktop-application-with-electron-204203eeb658
+
+voter reg icon from
+https://nova-ohio.org/
+
+example of small complete applicationn
+third party libraries for web pages
+    jquery
+    bootstrap css library
+    moments date library
+
+
+    add this link to tray icon
+    http://www.iconarchive.com/

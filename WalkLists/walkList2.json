@@ -1,0 +1,41 @@
+[
+	{
+		"key": "27w148street00000",
+		"address": "27W148 Street00000",
+		"names": [
+			"Doe00001-Denise"
+		],
+		"Home-Talked": false,
+		"NotHome": false,
+		"NotHome-LeftLit": false,
+		"Sign": "No",
+		"Donation": 0,
+		"_id": "0HtHv8Gro4bskrXN"
+	},
+	{
+		"key": "27w173street00070",
+		"address": "27W173 Street00070",
+		"names": [
+			"Doe00080-Cynthia"
+		],
+		"Home-Talked": false,
+		"NotHome": false,
+		"NotHome-LeftLit": false,
+		"Sign": "No",
+		"Donation": 0,
+		"_id": "0kJsWaiygdk3AQjK"
+	},
+	{
+		"key": "27w162street00160",
+		"address": "27W162 Street00160",
+		"names": [
+			"Doe00176-Keith"
+		],
+		"Home-Talked": false,
+		"NotHome": false,
+		"NotHome-LeftLit": false,
+		"Sign": "No",
+		"Donation": 0,
+		"_id": "2NOXvV2y0ky7xqcf"
+	}
+]

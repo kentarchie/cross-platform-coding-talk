@@ -197,12 +197,8 @@ function settingsInit(app)
 	if(!Settings.has('UVM.nedbLoaded')) Settings.set('UVM.nedbLoaded',false);
 	if(!Settings.has('UVM.nedbLoaded')) Settings.set('UVM.nedbLoaded',false);
 
-	//Settings.set('UVM.csvFileName',chosenFile);
-	//Settings.set('UVM.csvFileDate',formatted);
-	//Settings.set('UVM.numberOfRecords',jsonObj.length);
-	//Settings.set('UVM.numberOfFields',Object.keys(jsonObj[0]).length);
-
 	let userDataPath = app.getPath ('userData');
 	if(!Settings.has('UVM.dbDir')) Settings.set('UVM.dbDir',userDataPath+'/DB');
 	if(!Settings.has('UVM.queriesDir')) Settings.set('UVM.queriesDir',userDataPath+'/Queries');
+	if(!Settings.has('UVM.walkLists')) Settings.set('UVM.walkLists',userDataPath+'/WalkLists');
 } // settingsInit

@@ -62,12 +62,12 @@
 			 	<h2>Walk Lists</h2>
 				<form>
 					<section>
-						<button type='button' id='ageSelect' name='ageSelect'> Select Age Filter</button>
-						<button type='button' id='makeWalkList' name='makeWalkList'> Make Walk List</button>
-						<button type='button' id='saveWalkList' name='saveWalkList'> Save Walk List</button>
-						<button type='button' id='selectWalkListDir' name='selectWalkListDir'> Select Directory for Walk Lists</button>
-						<label for='walkListName'>Walk List Name</label>
-						<input type='text' id='walkListName' name='walkListName' />
+						<button type='button' id='makeWalkList' name='makeWalkList' 
+								  title='Load the street names from the database'>Make Walk List</button>
+						<button type='button' id='saveWalkList' name='saveWalkList' 
+								  title='Save the walk list to a file'>Save Walk List</button>
+						<label for='walkListDir'>Walk List Name</label>
+						<div id='walkListDir'></div>
 					</section>
 
 					<section class='walkSection'>

@@ -1,4 +1,3 @@
-const Constants=require('../mainJS/constants.js');
 const Utilities=require('../mainJS/Utilities.js');
 const {remote} = require('electron');
 const {ipcRenderer} = require('electron');
@@ -8,11 +7,13 @@ const {dialog} = require('electron').remote;
 const dateFormat = require('dateformat');
 const csv=require('csvtojson');
 const Settings = require('electron').remote.require('electron-settings');
-const DataStore = require('nedb');  
+//const DataStore = require('nedb');  
+const DataStore = require('nedb-promises');  
 
 let CliData = remote.getCurrentWindow().CliData; // parameters from the command line
 let Utils = null;
-let VoterDB = null;
+let VotersDB = null;
+let HouseholdsDB = null;
 let AddressIndex = {};
 
 let UserIDFields = ['Precinct','LastName','LastNameSuffix','FirstName','MiddleName','HouseNumber','Direction','StreetName','Unit','City','zip'];
@@ -76,8 +77,7 @@ $(document).ready(function()
 	});
 
 	$('#makeWalkList').click((ev) => {
-		//$('#saveWalkList').prop("disabled",true);
-		loadAddresses();
+		makeWalkList();
 	});
 	$('#saveWalkList').click((ev) => {
 		saveWalkList();
@@ -85,7 +85,7 @@ $(document).ready(function()
 
 	$('#runAgeQuery').click((ev) => {
 		Utils.logger('runAgeQuery clicked');
-		voterDB.find({ Age: { $lt: 50 }}, function(err, docs) {  
+		VotersDB.find({ Age: { $lt: 50 }}, function(err, docs) {  
     		docs.forEach(function(d) {
       		Utils.logger('runAgeQuery: address:', d.Address);
 				$('#queryResults').html( $('#queryResults').html() + d.Address + '<br />')
@@ -99,12 +99,30 @@ $(document).ready(function()
 	tabSetup();
 
 	let voterDBFile = Settings.get('UVM.dbDir') + '/voters.db';
-	if (fsLib.existsSync(voterDBFile)) { 
-		voterDB = new DataStore({ 
-			filename: Settings.get('UVM.dbDir') + '/voters.db'
+	let householdsDBFile = Settings.get('UVM.dbDir') + '/households.db';
+	Utils.logger('ready: voterDBFile=:%s:',voterDBFile);
+	Utils.logger('ready: householdsDBFile=:%s:',householdsDBFile);
+	VotersDB = new DataStore({ 
+			filename: voterDBFile
 			,autoload: true
-		});
-	} 
+	});
+	Utils.logger('ready: VotersDB created');
+	if(VotersDB == null) Utils.logger('ready: VotersDB NULL');
+	/*
+	HouseholdsDB = new DataStore({ 
+			filename: householdsDBFile
+			,autoload: true
+	});
+	*/
+	HouseholdsDB = DataStore.create({ 
+			filename: householdsDBFile
+			,autoload: true
+	});
+	HouseholdsDB.load();
+	HouseholdsDB.ensureIndex({ fieldName: 'key', unique: true }, (err) => {
+		Utils.logger('ready: HouseholdsDB index failed err=:%s:',err);
+	});
+	Utils.logger('ready: HouseholdsDB created');
 }); // ready function
 
 function setStatus()
@@ -149,13 +167,14 @@ function getCSVFile ()
     $('#csvFileDate').html(formatted);
     Settings.set('UVM.csvFileDate',formatted);
  			  
-    $('#csvFileName').html(pathParts.base);
+    //$('#csvFileName').html(pathParts.base);
+    $('#csvFileName').html(path.basename(chosenFile));
  
     // display number of records and number of fields per record
     let jsonObj = [];
     csv()
        .fromFile(chosenFile)
-       .then((jsonObj)=>{
+       .then((jsonObj)=>{ // jsonObj contains array of rows from csv file
           $('#numberOfRecords').html(jsonObj.length);
           $('#numberOfFields').html(Object.keys(jsonObj[0]).length);
           Settings.set('UVM.numberOfRecords',jsonObj.length);
@@ -176,6 +195,12 @@ function makeUID(record)
 	return uid;
 } // makeUID
 
+function makeHouseholdKey(record)
+{
+	let householdKey = record['Address'].toLowerCase().replace(/\s/g,'');
+	return householdKey;
+} // makeHouseholdKey
+
 function makeTrackingField(tracker,trackingFieldDef)
 {
     let value = null;
@@ -183,12 +208,34 @@ function makeTrackingField(tracker,trackingFieldDef)
     tracker[trackingFieldDef['name']] = value;
 } // makeTrackingField
 
+// change a string value to a number
 function changeToNumber(record,field) 
 { 
 	if(record[field] && (typeof record[field] == 'string')) {
 		record[field] = Number(record[field]);
 	}
 } // changeToNumber
+
+function makeAddressIndex(addressIndex,voter)
+{
+	let key = makeHouseholdKey(voter);
+	if(key in addressIndex) {
+ 		Utils.logger('makeAddressIndex: repeated key :%s:', key);
+		addressIndex[key]['names'].push(voter['LastName'] + '-' + voter['FirstName']);
+	}
+	else {
+ 		Utils.logger('makeAddressIndex: new key :%s:', key);
+		let newData = new Object();
+		newData['key'] = key;
+		newData['address'] = voter['Address'];
+		newData['names'] = [];
+		newData['names'].push(voter['LastName'] + '-' + voter['FirstName']);
+		AddressIndex[key] = newData;
+      TrackingFields.forEach((field) => {
+		   makeTrackingField(AddressIndex[key],field);
+      });
+	}
+} // makeAddressIndex
 
 function makeDB(jsonObj)
 {
@@ -197,6 +244,7 @@ function makeDB(jsonObj)
    let queriesDir = Settings.get('UVM.queriesDir');
 	Utils.logger('makeDB: dbDir = :%s: queriesDir = :%s: jsonObj.length = %d',dbDir,queriesDir,jsonObj.length);
 	let uidTable = {};
+	let addressIndex = {};
    
    // add ids, covert number fields and add voter tracking fields
 	for(var i=0; i< jsonObj.length; i++) {
@@ -205,14 +253,12 @@ function makeDB(jsonObj)
       NumberFields.forEach((field) => {
 		   changeToNumber(jsonObj[i],field);
       });
-      jsonObj[i]['tracking'] = {};
-      TrackingFields.forEach((field) => {
-		   makeTrackingField(jsonObj[i]['tracking'],field);
-      });
+		makeAddressIndex(addressIndex,jsonObj[i]);
 
       // make a map of uids to check if we have duplicates
 		uidTable[uid] += (uidTable[uid]) ? `${uidTable[uid]}, ${i}` : -1;
-	}
+	} // end of voter records update
+
 	let numberIds = Object.keys(jsonObj).length;
 	let dupIds = 0;
 	let keys = Object.keys(uidTable);
@@ -224,31 +270,41 @@ function makeDB(jsonObj)
 	}
 	Utils.logger('makeDB: dup count = %d uidTable.length = %d',dupIds,numberIds);
 	if(dupIds === 0) {
-		if( Settings.get('UVM.nedbCreated') || Settings.get('UVM.nedbLoaded')) {
+		if( Settings.get('UVM.nedbCreated') || Settings.get('UVM.nedbLoaded')) { //DB exists
 			if(window.confirm('Do you want to delete the current voter db, this cannot be undone')) {
 				//Settings.set('UVM.nedbCreated',true) Settings.set('UVM.nedbLoaded',true)
 				// remove existing DB
-				voterDB.remove({ },{ multi:true},
+				VotersDB.remove({ },{ multi:true},
 				function(err,numRemoved) {
-					voterDB.loadDatabase(function(err) {
-						Utils.logger('DB removed numRemoved = %d',numRemoved);
+					VotersDB.loadDatabase(function(err) {
+						Utils.logger('makeDB: DB removed: number of deleted records = %d',numRemoved);
 					})
 					});
 				} // confirm remove DB
 		} // db already exists
-		voterDB = new DataStore({ 
-			filename: Settings.get('UVM.dbDir') + '/voters.db'
-			,autoload: true
-		});
+//		VotersDB = new DataStore({ 
+//			filename: Settings.get('UVM.dbDir') + '/voters.db'
+//			,autoload: true
+//		});
 		Settings.set('UVM.nedbCreated',true);
 		$('#dbStatus').html('Created');
 		Utils.logger('makeDB: db created');
 		for(var i=0; i< jsonObj.length; i++) {
-			voterDB.insert(jsonObj[i], function(err, doc) {  
+			VotersDB.insert(jsonObj[i], function(err, doc) {  
     			if((i % 500) == 0) Utils.logger('makeDB: Inserted', doc.name, 'with ID', doc._id);
 			});
 		}
+
+		// load Households DB
+		let households = Object.keys(AddressIndex);
+		for(var i=0; i< households.length; i++) {
+			HouseholdsDB.insert(AddressIndex[households[i]], function(err, doc) {  
+    			if((i % 500) == 0) Utils.logger('makeDB: Households Inserted', doc.key, 'with ID', doc._id);
+			});
+		}
+
 		Settings.set('UVM.nedbLoaded',true);
+
 		Utils.logger('makeDB: db loaded');
 		$('#dbStatus').html('Loaded');
 	}
@@ -299,47 +355,25 @@ function selectWalkListDir()
 	 Utils.logger('selectWalkListDir: path =:%s:',path);
 } // selectWalkListDir
 
-function loadAddresses()
-{
-	voterDB.find({}, function(err, docs) {  
-			Utils.logger('loadAddresses: docs.length =:%d:',docs.length);
-			$('#totalAddressCount').html(docs.length);
-    		docs.forEach(function(d) {
-				let key = d['Address'].toLowerCase().replace(/\s/g,'');
-      		//Utils.logger('loadAddresses: :%s:', key);
-				if(key in AddressIndex) {
-					AddressIndex[key]['names'].push(d['LastName'] + '-' + d['FirstName']);
-      			//Utils.logger('loadAddresses: added another name');
-				}
-				else {
-      			//Utils.logger('loadAddresses: adding new name');
-					let newData = new Object();
-					newData['address'] = d['Address'];
-					newData['names'] = [];
-					newData['names'].push(d['LastName'] + '-' + d['FirstName']);
-					AddressIndex[key] = newData;
-				}
-    		}); // docs loop
-			Utils.logger('loadAddresses: FINAL num unique addresses =:%d:',Object.keys(AddressIndex).length);
-			makeWalkList();
-	}); // find
-} // loadAddresses
-
 function makeWalkList()
 {
 	Utils.logger('makeWalkList: START');
-	if(Object.keys(AddressIndex).length == 0) {
-		loadAddresses();
-		Utils.logger('makeWalkList: loadAddresses DONE');
-	}
 	let rows = [];
-	for (var key in AddressIndex) {
-      let humanAddress = AddressIndex[key]['address'];
-		rows.push(`<li class='walkList' />`); 
-		rows.push(`<span class='address' data-address='${key}'>${humanAddress}</span>`); 
-      rows.push("</li>");
-	}
-	$('#sourceAddressList').html(rows.join(''));
+	HouseholdsDB.find({}).then(function() {  
+	//HouseholdsDB.find({}, function(err, households) {  
+		let households = arguments[0];
+			Utils.logger('makeWalkList: households.length =:%d:',households.length);
+			$('#totalAddressCount').html(households.length);
+    		households.forEach(function(house) {
+				let key = house['key'];
+				//Utils.logger('makeWalkList: creating DOM for key :%s:',key);
+      		let humanAddress = house['address'];
+				rows.push(`<li class='walkList' />`); 
+				rows.push(`<span class='address' data-address='${key}'>${humanAddress}</span>`); 
+      		rows.push("</li>");
+    		}); // docs loop
+			$('#sourceAddressList').html(rows.join(''));
+	}); // find
 } // makeWalkList
 
 function selectAddress(ev)
@@ -363,14 +397,68 @@ function selectAddress(ev)
   	});
 } // selectAddress
 
+function getHousehold(li)
+{
+	let key = $(li).data('address');
+	return HouseholdsDB.findOne({ 'key': key });
+	/*
+  		.then(() => {
+      	Utils.logger('getHousehold: found key=:%s:',key);
+			Utils.logger('getHousehold: getHousehold=:%s:',JSON.stringify(arguments[0],null,'\t'));
+		  })
+		  .catch()
+		  */
+} // getHousehold
+
 function saveWalkList(ev)
 {
-   Utils.logger('saveWaLkList: START:');
-	let liList = $('#destAddressList li span'); 
-   let keyList = [];
-   liList.each((liIndex,li) => {
-      let key = $(li).data('address');
-      keyList.push(key);
-      Utils.logger('saveWalkList: data key=:%s:',key);
-   });
+	Utils.logger('saveWaLkList: START:');
+
+	let defaultPath = Settings.get('UVM.walkLists');
+	dialog.showSaveDialog(
+		{
+			defaultPath : defaultPath
+    		,filters: [{
+      		name: 'JSON',
+      		extensions: ['json']
+    		}]
+  		},(fileName) => {
+   			if (fileName === undefined){
+        			console.log("You didn't choose a file");
+        			return;
+				}
+				let newPath = path.dirname(fileName);
+      		Utils.logger('saveWalkList: defaultPath=:%s: newPath = :%s:',defaultPath, newPath);
+				if(newPath !== defaultPath) {
+					if(window.confirm('Change the default folder for walk lists to '+ newPath)) {
+						Settings.set('UVM.walkLists',newPath);
+					}
+				}
+
+      		Utils.logger('saveWalkList: fileName=:%s:',fileName);
+				let liList = $('#destAddressList li span'); 
+   			let walkData = [];
+				var promises = [];
+   			liList.each((liIndex,li) => {
+			 		let thisHouse = getHousehold(li);
+					Utils.logger('saveWalkList: getHousehold=:%s:',JSON.stringify(thisHouse,null,'\t'));
+			 		promises.push(thisHouse);
+				});
+				Promise.all(promises).then(function() {
+    				// returned data is in arguments[0], arguments[1], ... arguments[n]
+					// you can process it here
+					Utils.logger('saveWalkList: arguments.length=:%d:',arguments.length);
+					Utils.logger('saveWalkList: arguments[0]=:%s:',JSON.stringify(arguments[0],null,'\t'));
+					let content = JSON.stringify(arguments[0],null,'\t');
+
+   				// fileName is a string that contains the path and filename created in the save file dialog.  
+   				fsLib.writeFile(fileName, content, (err) => {
+      				if(err){
+            			alert('An error ocurred creating the file '+ err.message)
+      				}
+   				});
+				}, function(err) {
+    				// error occurred
+					});
+		}); // end of showDialog
 } // saveWalkList
