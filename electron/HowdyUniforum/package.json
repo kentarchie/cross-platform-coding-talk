@@ -1,0 +1,15 @@
+{
+  "name": "howdyuniforum",
+  "version": "1.0.0",
+  "description": "Simple Uniforum Example",
+  "main": "mainJS/serverMain.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+    ,"start" : "electron mainJS/serverMain.js"
+  },
+  "keywords": [
+    "example"
+  ],
+  "author": "Kent Archie",
+  "license": "MIT"
+}
