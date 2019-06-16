@@ -6,6 +6,21 @@ const APP_URL = 'file://' + __dirname + '/../clientApp/index.html';
 
 let MainWindow = null;
 
+app.on('ready', () => {
+	createMainWindow();
+});
+
+//quit the app once closed
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin')
+        app.quit();
+});
+
+app.on('activate', () => {
+    if (MainWindow == null)
+        createMainWindow();
+});
+
 function createMainWindow()
 {
     console.log('__dirname ' + __dirname);
@@ -25,17 +40,3 @@ function createMainWindow()
 	 MainWindow.once('ready-to-show', () => { MainWindow.show(); });
 } // createMainWindow
 
-app.on('ready', () => {
-	createMainWindow();
-});
-
-//quit the app once closed
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin')
-        app.quit();
-});
-
-app.on('activate', () => {
-    if (MainWindow == null)
-        createMainWindow();
-});
