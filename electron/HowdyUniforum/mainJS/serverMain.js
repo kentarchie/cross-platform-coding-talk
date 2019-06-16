@@ -32,7 +32,7 @@ function createMainWindow()
     });
 	 MainWindow.loadURL(APP_URL);
     console.log('page loaded');
-    MainWindow.webContents.openDevTools(); // show chrome console
+    //MainWindow.webContents.openDevTools(); // show chrome console
 
 	 MainWindow.on('closed', () => { MainWindow = null; });
 		  
