@@ -11,5 +11,9 @@
     "example"
   ],
   "author": "Kent Archie",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "electron-packager": "^13.1.1",
+    "electron": "^4.1.0"
+  }
 }
