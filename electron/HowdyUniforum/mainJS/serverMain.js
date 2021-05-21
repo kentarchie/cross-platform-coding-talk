@@ -1,6 +1,7 @@
 'use strict';
 global.__base = __dirname + '/';
 const {app, BrowserWindow} = require('electron');
+const process = require('process');
 
 const APP_URL = 'file://' + __dirname + '/../clientApp/index.html';
 
@@ -23,16 +24,20 @@ app.on('activate', () => {
 
 function createMainWindow()
 {
-    console.log('__dirname ' + __dirname);
+    console.log('MAIN:createWindow:  __dirname ' + __dirname);
     MainWindow = new BrowserWindow({ 
 		  'width': 800
 		  ,'height': 600 
+		  ,webPreferences: {
+        		nodeIntegration: true
+    		}
 		  ,backgroundColor: "#D6D8DC" // background color of the page, prevents any white flickering
 		  ,show: false // Don't show the window until it's ready, prevents any white flickering
     });
+
 	 MainWindow.loadURL(APP_URL);
-    console.log('page loaded');
-    //MainWindow.webContents.openDevTools(); // show chrome console
+    console.log('MAIN: createWindow: page loaded');
+    MainWindow.webContents.openDevTools(); // show chrome console
 
 	 MainWindow.on('closed', () => { MainWindow = null; });
 		  

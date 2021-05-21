@@ -1,12 +1,15 @@
 document.addEventListener("DOMContentLoaded", function()
 {
-      document.getElementById('nodeVersion').innerHTML = process.versions.node;
-      console.log('node version set');
-      document.getElementById('chromeVersion').innerHTML = process.versions.chrome;
-      console.log('chrome version set');
-      document.getElementById('electronVersion').innerHTML = process.versions.electron;
-      console.log('electron version set');
+	var nodeVersion =     (process && process.versions) ? process.versions.node : 'unknown';
+	var chromeVersion =   (process && process.versions) ? process.versions.chrome : 'unknown';
+	var electronVersion = (process && process.versions) ? process.versions.electron : 'unknown';
 
-      document.getElementById('thisButton').addEventListener("click",thisButton,false);
+   document.getElementById('nodeVersion').innerHTML = nodeVersion;
+   console.log('Client: node version set');
+   document.getElementById('chromeVersion').innerHTML = chromeVersion;
+   console.log('Client: chrome version set');
+   document.getElementById('electronVersion').innerHTML = electronVersion;
+   console.log('Client: electron version set');
 
+   document.getElementById('thisButton').addEventListener("click",thisButton,false);
 });
